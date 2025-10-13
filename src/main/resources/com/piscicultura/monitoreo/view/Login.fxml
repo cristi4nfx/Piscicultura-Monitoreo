@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/8.0.171"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.piscicultura.monitoreo.controller.LoginController"
+            prefHeight="300.0" prefWidth="400.0">
+
+    <children>
+        <VBox alignment="CENTER" spacing="10" layoutX="50" layoutY="50" prefWidth="300">
+            <Label text="Inicio de Sesión" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+            <TextField fx:id="txtNombreUsuario" promptText="Nombre de usuario" prefWidth="250"/>
+            <PasswordField fx:id="txtPassword" promptText="Contraseña" prefWidth="250"/>
+
+            <Button text="Iniciar sesión" onAction="#handleLogin" prefWidth="150"/>
+
+            <Label fx:id="lblMensaje" textFill="red" wrapText="true" alignment="CENTER"/>
+        </VBox>
+    </children>
+</AnchorPane>

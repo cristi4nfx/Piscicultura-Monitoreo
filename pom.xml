@@ -15,7 +15,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>24</maven.compiler.release>
-        <exec.mainClass>com.piscicultura.monitoreo.App</exec.mainClass>
+        <exec.mainClass>com.piscicultura.monitoreo.PisciculturaMonitoreo</exec.mainClass>
     </properties>
 
     <dependencies>
@@ -30,6 +30,21 @@
             <artifactId>javafx-fxml</artifactId>
             <version>25</version>
         </dependency>
+        
+        <!-- PostgreSQL JDBC -->
+        <dependency>
+          <groupId>org.postgresql</groupId>
+          <artifactId>postgresql</artifactId>
+          <version>42.7.3</version>
+        </dependency>
+
+        <!-- BCrypt para hashear contraseñas -->
+        <dependency>
+          <groupId>org.mindrot</groupId>
+          <artifactId>jbcrypt</artifactId>
+          <version>0.4</version>
+        </dependency>
+        
     </dependencies>
 
     <build>
@@ -40,7 +55,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>com.piscicultura.monitoreo.App</mainClass>
+                    <mainClass>com.piscicultura.monitoreo.PisciculturaMonitoreo</mainClass>
                 </configuration>
             </plugin>
         </plugins>

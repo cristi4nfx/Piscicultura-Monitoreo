@@ -6,6 +6,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
+import javafx.stage.Modality;  
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import java.io.IOException;
@@ -38,9 +39,24 @@ public class AdminController {
     // ===== Acciones de menú/botones =====
     @FXML
     private void onCrearUsuario() {
-        setEstado("Abriendo formulario de creación de usuario...");
-        // Aquí luego cargas otro FXML en el centro o abres un dialog
-        info("Pendiente", "Aquí irá el formulario de creación de usuario.");
+        try {
+            // Cargar el formulario
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/piscicultura/monitoreo/view/crear_user.fxml"));
+            javafx.scene.Parent root = loader.load();
+            // Crear una nueva ventana (Stage)
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Crear Usuario");
+            dialogStage.initModality(Modality.WINDOW_MODAL); // 🔒 bloquea la ventana principal
+            dialogStage.initOwner(stage);                    // asocia al AdminController.stage
+            dialogStage.setScene(new Scene(root));
+            dialogStage.setResizable(false);
+            dialogStage.showAndWait();                       // espera hasta que se cierre
+            setEstado("Formulario de creación de usuario cerrado.");
+        } catch (IOException e) {
+            error("Error", "No se pudo abrir el formulario:\n" + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -61,10 +77,11 @@ public class AdminController {
         });
     }
     
-        @FXML
-    private void onCerrarSesion() {
+    @FXML
+    private void onCambiarRol() {
         var conf = new Alert(Alert.AlertType.CONFIRMATION,
-                "¿Cerrar sesión y volver al login?", ButtonType.YES, ButtonType.NO);
+                "¿Cerrar sesión y volver al"
+                        + " login?", ButtonType.YES, ButtonType.NO);
         conf.setHeaderText("Cerrar sesión");
         conf.showAndWait().ifPresent(bt -> {
             if (bt == ButtonType.YES) {

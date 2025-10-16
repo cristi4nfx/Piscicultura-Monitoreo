@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.lang.*?>
+
+<VBox xmlns="http://javafx.com/javafx/8.0.171"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.piscicultura.monitoreo.controller.CrudController"
+      spacing="12">
+
+    <padding>
+        <Insets top="16" right="16" bottom="16" left="16"/>
+    </padding>
+
+    <!-- Título -->
+    <Label text="Crear Usuario" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+    <!-- Formulario -->
+    <GridPane hgap="12" vgap="10">
+        <columnConstraints>
+            <ColumnConstraints halignment="RIGHT" minWidth="140"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+        </columnConstraints>
+
+        <!-- Nombre de usuario -->
+        <Label text="Nombre de usuario:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtNombreUsuario" promptText="p.ej. admin1"
+                   GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+        <!-- Email -->
+        <Label text="Email:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtEmail" promptText="correo@ejemplo.com"
+                   GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+        <!-- Contraseña -->
+        <Label text="Contraseña:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <PasswordField fx:id="txtContrasena" promptText="•••••••"
+                       GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+        <!-- Confirmar contraseña -->
+        <Label text="Confirmar contraseña:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <PasswordField fx:id="txtConfirmar" promptText="repite la contraseña"
+                       GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+        <!-- Teléfono -->
+        <Label text="Teléfono:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtTelefono" promptText="3001234567"
+                   GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+        <!-- Rol -->
+        <Label text="Rol:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+        <ChoiceBox fx:id="cbRol" GridPane.rowIndex="5" GridPane.columnIndex="1">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <String fx:value="ADMIN"/>
+                    <String fx:value="TECNICO"/>
+                    <String fx:value="INVESTIGADOR"/>
+                </FXCollections>
+            </items>
+        </ChoiceBox>
+
+        <!-- Activo -->
+        <Label text="Activo:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+        <CheckBox fx:id="chkActivo" selected="true"
+                  GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+    </GridPane>
+
+    <!-- Botones -->
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button fx:id="btnCancelar" text="Cancelar" onAction="#onCancelar" mnemonicParsing="false"/>
+        <Button fx:id="btnGuardar"  text="Guardar"  onAction="#onCrearUsuario" defaultButton="true" mnemonicParsing="false"/>
+    </HBox>
+</VBox>

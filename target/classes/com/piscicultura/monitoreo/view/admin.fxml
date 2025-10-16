@@ -45,7 +45,8 @@
             </padding>
             <Label text="Acciones rápidas" style="-fx-font-weight: bold;"/>
             <Button text="Registrar usuario" onAction="#onCrearUsuario" maxWidth="Infinity"/>
-            <Button text="Ver usuarios"      onAction="#onListarUsuarios" maxWidth="Infinity"/>
+            <Button text="Ver usuarios" onAction="#onListarUsuarios" maxWidth="Infinity"/>
+            <Button text="Editar Rol" onAction="#onCambiarRol" maxWidth="Infinity"/>
         </VBox>
     </left>
 

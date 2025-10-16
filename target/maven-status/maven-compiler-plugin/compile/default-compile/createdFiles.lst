@@ -18,5 +18,7 @@ com\piscicultura\monitoreo\util\TestLogin.class
 com\piscicultura\monitoreo\model\Administrador.class
 com\piscicultura\monitoreo\controller\LoginController.class
 com\piscicultura\monitoreo\dao\UsuarioDAO.class
+com\piscicultura\monitoreo\controller\CrudController$UsuarioFormData.class
+com\piscicultura\monitoreo\controller\CrudController.class
 com\piscicultura\monitoreo\dao\EstanqueDAO.class
 com\piscicultura\monitoreo\PisciculturaMonitoreo.class

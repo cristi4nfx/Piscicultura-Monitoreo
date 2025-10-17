@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/8.0.171"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.piscicultura.monitoreo.controller.CrudFincaController"
+      spacing="16" alignment="TOP_CENTER"
+      style="-fx-padding: 20;">
+
+    <Label text="Registrar Nueva Finca"
+           style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+
+    <GridPane hgap="15" vgap="12">
+        <columnConstraints>
+            <ColumnConstraints halignment="RIGHT" minWidth="150"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+        </columnConstraints>
+
+        <!-- Nombre -->
+        <Label text="Nombre de la finca:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtNombre" promptText="Ej: Granja San Pedro"
+                   GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+        <!-- Departamento -->
+        <Label text="Departamento:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <ComboBox fx:id="cboDepartamento" promptText="Selecciona un departamento"
+                  GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+        <!-- Municipio -->
+        <Label text="Municipio:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <ComboBox fx:id="cboMunicipio" promptText="Selecciona un municipio" disable="true"
+                  GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+        <!-- Longitud -->
+        <Label text="Longitud (m):" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtLongitud" promptText="Ej: 120.5"
+                   GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+        <!-- Área total -->
+        <Label text="Área total (m²):" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtAreaTotal" promptText="Ej: 5000"
+                   GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+    </GridPane>
+
+    <HBox spacing="20" alignment="CENTER_RIGHT">
+        <Button text="Guardar" style="-fx-background-color: #4CAF50; -fx-text-fill: white;"
+                onAction="#onGuardarFinca"/>
+        <Button text="Cancelar" style="-fx-background-color: #d9534f; -fx-text-fill: white;"
+                onAction="#onCancelar"/>
+    </HBox>
+
+    <Label fx:id="lblEstado" textFill="#555" style="-fx-font-size: 13px;"/>
+
+</VBox>

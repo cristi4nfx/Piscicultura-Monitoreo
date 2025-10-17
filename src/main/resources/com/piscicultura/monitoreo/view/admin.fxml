@@ -20,7 +20,8 @@
                     <MenuItem text="Cerrar sesión" onAction="#onCerrarSesion"/>
                 </Menu>
                 <Menu text="Fincas">
-                    <MenuItem text="Listar estanque" onAction="#onCerrarSesion"/>
+                    <MenuItem text="Crear finca" onAction="#onCrearFinca"/>
+                    <MenuItem text="Ver fincas" onAction="#onVerFincas"/>
                 </Menu>
                 
             </MenuBar>

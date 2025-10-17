@@ -1,18 +1,20 @@
 package com.piscicultura.monitoreo.controller;
 
+import javafx.application.Platform;
+import com.piscicultura.monitoreo.controller.CrudFincaController;
 import com.piscicultura.monitoreo.model.Usuario;
-import com.piscicultura.monitoreo.controller.CrudController;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
-
+import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
 import java.io.IOException;
+import javafx.scene.Parent;
 import javafx.scene.layout.VBox;
 
 public class AdminController {
@@ -103,6 +105,22 @@ public class AdminController {
             showPlaceholder("Error al cargar usuarios.");
         }
     }
+    
+    @FXML
+    private void onCrearFinca() {
+        try {
+            // Cargar el formulario y mostrarlo embebido (sin Stage modal)
+            FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/com/piscicultura/monitoreo/view/crear_finca.fxml")
+            );
+            Node root = loader.load();
+            showInCenter(root);
+            setEstado("Formulario de creación abierto.");
+        } catch (IOException e) {
+            error("Error", "No se pudo abrir el formulario:\n" + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
 
     @FXML
@@ -116,6 +134,31 @@ public class AdminController {
             }
         });
     }
+    
+
+    @FXML
+    private void onVerFincas() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/com/piscicultura/monitoreo/view/ver_finca.fxml")
+            );
+            Parent vista = loader.load();
+
+            // Poner la vista en el centro
+            contentPane.getChildren().setAll(vista);
+
+            // Obtener el controller de esa vista y disparar el pintado
+            CrudFincaController cf = loader.getController();
+            Platform.runLater(() -> cf.onVerFincas());  // ← lambda evita el "invalid method reference"
+
+            setEstado("Vista de fincas abierta.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            setEstado("Error al abrir ver_fincas.fxml: " + e.getMessage());
+        }
+    }
+
+
     
     
     @FXML

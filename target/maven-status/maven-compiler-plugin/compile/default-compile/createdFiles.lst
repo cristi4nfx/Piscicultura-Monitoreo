@@ -8,6 +8,7 @@ com\piscicultura\monitoreo\dao\Granja_PiscicolaDAO.class
 com\piscicultura\monitoreo\util\EnviarEmail.class
 com\piscicultura\monitoreo\model\Tecnico.class
 com\piscicultura\monitoreo\model\Especie.class
+com\piscicultura\monitoreo\controller\CrudFincaController.class
 com\piscicultura\monitoreo\model\GranjaPiscicola.class
 com\piscicultura\monitoreo\dao\UsuarioDAO$1.class
 com\piscicultura\monitoreo\model\Sensor.class

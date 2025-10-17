@@ -33,24 +33,6 @@ public class GranjaPiscicola {
         this.estanques = new ArrayList<>();
     }
 
-    public String agregarEstanque(Estanque estanque) {
-        if (estanque == null) {
-            return "No se puede agregar un estanque nulo.";
-        }
-        estanques.add(estanque);
-        return "Estanque agregado correctamente: " + estanque.getIdEstanque();
-    }
-
-    public String eliminarEstanque(int idEstanque) {
-        for (Estanque e : estanques) {
-            if (e.getIdEstanque() == idEstanque) {
-                estanques.remove(e);
-                return "Estanque eliminado correctamente (ID: " + idEstanque + ")";
-            }
-        }
-        return "No se encontró un estanque con ID: " + idEstanque;
-    }
-
     public int getIdGranja() { return idGranja; }
     public void setIdGranja(int idGranja) { this.idGranja = idGranja; }
 

@@ -19,6 +19,11 @@
                 <Menu text="Sistema">
                     <MenuItem text="Cerrar sesión" onAction="#onCerrarSesion"/>
                 </Menu>
+                <Menu text="Fincas">
+                    <MenuItem text="Crear finca" onAction="#onCrearFinca"/>
+                    <MenuItem text="Ver fincas" onAction="#onVerFincas"/>
+                </Menu>
+                
             </MenuBar>
 
             <!-- Barra superior con bienvenida -->

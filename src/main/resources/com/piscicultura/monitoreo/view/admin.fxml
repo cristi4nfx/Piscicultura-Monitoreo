@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.*?>
@@ -11,7 +10,7 @@
 
     <!-- TOP: Menú -->
     <top>
-        <VBox spacing="6">
+    <VBox spacing="6">
             <MenuBar>
                 <Menu text="Usuarios">
                     <MenuItem text="Crear usuario"   onAction="#onCrearUsuario"/>
@@ -20,6 +19,10 @@
                 <Menu text="Sistema">
                     <MenuItem text="Cerrar sesión" onAction="#onCerrarSesion"/>
                 </Menu>
+                <Menu text="Fincas">
+                    <MenuItem text="Listar estanque" onAction="#onCerrarSesion"/>
+                </Menu>
+                
             </MenuBar>
 
             <!-- Barra superior con bienvenida -->
@@ -44,19 +47,22 @@
                 <Insets top="12" right="12" bottom="12" left="12"/>
             </padding>
             <Label text="Acciones rápidas" style="-fx-font-weight: bold;"/>
+            <Button text="Inicio" onAction="#onInicio" maxWidth="Infinity"/>
             <Button text="Registrar usuario" onAction="#onCrearUsuario" maxWidth="Infinity"/>
             <Button text="Ver usuarios" onAction="#onListarUsuarios" maxWidth="Infinity"/>
-            <Button text="Editar Rol" onAction="#onCambiarRol" maxWidth="Infinity"/>
         </VBox>
     </left>
 
+
     <!-- CENTER: Área principal (placeholder) -->
     <center>
-        <StackPane>
-            <Label fx:id="lblEstado" text="Selecciona una acción del menú o de la izquierda."
+        <StackPane fx:id="contentPane" style="-fx-padding: 16;">
+            <Label fx:id="lblEstado"
+                   text="Selecciona una acción del menú o de la izquierda."
                    style="-fx-text-fill: #555; -fx-font-size: 14px;"/>
         </StackPane>
     </center>
+
 
     <!-- BOTTOM: Barra de estado -->
     <bottom>

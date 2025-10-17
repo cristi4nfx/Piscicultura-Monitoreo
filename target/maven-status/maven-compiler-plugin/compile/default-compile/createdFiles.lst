@@ -3,11 +3,13 @@ com\piscicultura\monitoreo\model\Rol.class
 com\piscicultura\monitoreo\util\TestConexion.class
 com\piscicultura\monitoreo\util\ConexionDB.class
 com\piscicultura\monitoreo\model\Estanque.class
+com\piscicultura\monitoreo\controller\CrudController$1.class
 com\piscicultura\monitoreo\dao\Granja_PiscicolaDAO.class
 com\piscicultura\monitoreo\util\EnviarEmail.class
 com\piscicultura\monitoreo\model\Tecnico.class
 com\piscicultura\monitoreo\model\Especie.class
 com\piscicultura\monitoreo\model\GranjaPiscicola.class
+com\piscicultura\monitoreo\dao\UsuarioDAO$1.class
 com\piscicultura\monitoreo\model\Sensor.class
 com\piscicultura\monitoreo\controller\AdminController.class
 com\piscicultura\monitoreo\dao\SensorDAO.class
@@ -18,7 +20,6 @@ com\piscicultura\monitoreo\util\TestLogin.class
 com\piscicultura\monitoreo\model\Administrador.class
 com\piscicultura\monitoreo\controller\LoginController.class
 com\piscicultura\monitoreo\dao\UsuarioDAO.class
-com\piscicultura\monitoreo\controller\CrudController$UsuarioFormData.class
 com\piscicultura\monitoreo\controller\CrudController.class
 com\piscicultura\monitoreo\dao\EstanqueDAO.class
 com\piscicultura\monitoreo\PisciculturaMonitoreo.class

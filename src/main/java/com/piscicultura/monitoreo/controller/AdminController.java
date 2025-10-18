@@ -158,9 +158,6 @@ public class AdminController {
         }
     }
 
-
-    
-    
     @FXML
     private void onInicio() {
         if (lblNombre!= null && lblNombre.getScene() != null) {

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.piscicultura.monitoreo.controller.EstanqueController"
+      spacing="12" alignment="TOP_CENTER"
+      style="-fx-padding: 16; -fx-background-color: linear-gradient(to bottom,#f9fbff,#eef4ff);">
+
+    <!-- Encabezado -->
+    <HBox spacing="12" alignment="CENTER_LEFT" maxWidth="900">
+        <Button text="Volver" onAction="#onSalir"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <TextField fx:id="txtBuscar" promptText="Buscar por tipo/estado..." prefWidth="260"/>
+        <Button text="Filtrar" onAction="#onFiltrar"/>
+        <Button text="Limpiar" onAction="#onLimpiarFiltro"/>
+        <Button text="Nuevo Estanque" onAction="#onNuevoEstanque"/>
+    </HBox>
+
+    <!-- Listado con scroll vertical -->
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                prefHeight="520" maxWidth="900" VBox.vgrow="ALWAYS"
+                style="-fx-background-color: transparent;">
+        <content>
+            <VBox fx:id="boxListado" spacing="10" style="-fx-padding: 8;"/>
+        </content>
+    </ScrollPane>
+
+    <!-- Barra de estado -->
+    <Label fx:id="lblEstado" textFill="#546e7a" style="-fx-padding: 4 0 0 0;"/>
+
+</VBox>

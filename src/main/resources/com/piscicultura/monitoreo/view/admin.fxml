@@ -51,6 +51,8 @@
             <Button text="Inicio" onAction="#onInicio" maxWidth="Infinity"/>
             <Button text="Registrar usuario" onAction="#onCrearUsuario" maxWidth="Infinity"/>
             <Button text="Ver usuarios" onAction="#onListarUsuarios" maxWidth="Infinity"/>
+            <Button text="Crear finca" onAction="#onCrearFinca" maxWidth="Infinity"/>
+            <Button text="Ver fincas" onAction="#onVerFincas" maxWidth="Infinity"/>
         </VBox>
     </left>
 

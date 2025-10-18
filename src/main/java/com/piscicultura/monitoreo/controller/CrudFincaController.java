@@ -45,41 +45,51 @@ public class CrudFincaController implements Initializable {
     private final Map<String, Integer> deptIdByName = new HashMap<>();
     private final Map<String, Long> muniIdByName = new HashMap<>();
 
+    // === NUEVO: contenedores creados por código (no tocas tu FXML) ===
+    @FXML private AnchorPane desktopPane; // debe existir en tu FXML
+    private ScrollPane spListado;         // se crea en onVerFincas()
+    private VBox boxListado;              // se crea en onVerFincas()
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         try {
-            conn = ConexionDB.getConnection(); // tu método existente
-            cargarDepartamentos();
+            conn = ConexionDB.getConnection();
 
-            cboDepartamento.setItems(departamentosItems);
-            cboMunicipio.setItems(municipiosItems);
-            cboMunicipio.setDisable(true);
+            // Solo configurar combos si EXISTEN en este FXML
+            if (cboDepartamento != null && cboMunicipio != null) {
+                cargarDepartamentos();
 
-            // Cuando cambie el departamento, carga sus municipios
-            cboDepartamento.valueProperty().addListener((obs, oldVal, newVal) -> {
-                municipiosItems.clear();
-                muniIdByName.clear();
-                if (newVal == null) {
-                    cboMunicipio.setDisable(true);
-                    cboMunicipio.getSelectionModel().clearSelection();
-                    return;
-                }
-                Integer depId = deptIdByName.get(newVal);
-                if (depId != null) {
-                    cargarMunicipiosPorDepartamento(depId);
-                    cboMunicipio.setDisable(false);
-                } else {
-                    setEstado("No se encontró id para el departamento seleccionado.", true);
-                    cboMunicipio.setDisable(true);
-                }
-            });
+                cboDepartamento.setItems(departamentosItems);
+                cboMunicipio.setItems(municipiosItems);
+                cboMunicipio.setDisable(true);
+
+                cboDepartamento.valueProperty().addListener((obs, oldVal, newVal) -> {
+                    municipiosItems.clear();
+                    muniIdByName.clear();
+                    if (newVal == null) {
+                        cboMunicipio.setDisable(true);
+                        cboMunicipio.getSelectionModel().clearSelection();
+                        return;
+                    }
+                    Integer depId = deptIdByName.get(newVal);
+                    if (depId != null) {
+                        cargarMunicipiosPorDepartamento(depId);
+                        cboMunicipio.setDisable(false);
+                    } else {
+                        setEstado("No se encontró id para el departamento seleccionado.", true);
+                        cboMunicipio.setDisable(true);
+                    }
+                });
+            }
 
         } catch (SQLException e) {
             setEstado("Error de conexión: " + e.getMessage(), true);
         } catch (Exception ex) {
-            System.getLogger(CrudFincaController.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+            System.getLogger(CrudFincaController.class.getName())
+                  .log(System.Logger.Level.ERROR, (String) null, ex);
         }
     }
+
 
     private void cargarDepartamentos() throws SQLException {
         departamentosItems.clear();
@@ -196,40 +206,153 @@ public class CrudFincaController implements Initializable {
             e.printStackTrace();
         }
     }
-    
-    @FXML
-    private AnchorPane desktopPane; // debe coincidir con el fx:id del FXML
+
+    // =====================================================================================
+    // LISTADO EN COLUMNA CON SCROLL (NO MOVIBLE)
+    // =====================================================================================
 
     @FXML
     protected void onVerFincas() {
-        desktopPane.getChildren().clear();
+        try {
+            // Crea una sola vez el ScrollPane y el VBox (reutilizables)
+            ensureListadoUI();
 
-        com.piscicultura.monitoreo.dao.Granja_PiscicolaDAO dao =
-                new com.piscicultura.monitoreo.dao.Granja_PiscicolaDAO(conn);
-        java.util.List<com.piscicultura.monitoreo.model.GranjaPiscicola> fincas = dao.listarTodos();
+            // Poblar
+            boxListado.getChildren().clear();
 
-        double x = 30, y = 30;   // posición inicial
-        double dx = 28, dy = 24; // separación en cascada
+            com.piscicultura.monitoreo.dao.Granja_PiscicolaDAO dao =
+                    new com.piscicultura.monitoreo.dao.Granja_PiscicolaDAO(conn);
+            java.util.List<com.piscicultura.monitoreo.model.GranjaPiscicola> fincas = dao.listarTodos();
 
-        for (com.piscicultura.monitoreo.model.GranjaPiscicola finca : fincas) {
-            Node ventana = crearVentanaInterna(finca);
-            ((Region) ventana).setPrefSize(320, 180);
-            ventana.setLayoutX(x);
-            ventana.setLayoutY(y);
-
-            desktopPane.getChildren().add(ventana);
-
-            // Posición en cascada
-            x += dx; y += dy;
-            if (x + 340 > desktopPane.getWidth()) {
-                x = 30; y += 40;
+            for (com.piscicultura.monitoreo.model.GranjaPiscicola finca : fincas) {
+                Node tarjeta = crearTarjetaFinca(finca);
+                boxListado.getChildren().add(tarjeta);
             }
+            setEstado("Mostrando " + fincas.size() + " finca(s).", false);
+        } catch (Exception e) {
+            setEstado("Error listando fincas: " + e.getMessage(), true);
+            e.printStackTrace();
         }
-
-        setEstado("Mostrando " + fincas.size() + " finca(s).", false);
     }
 
+    /** Garantiza que exista un ScrollPane con un VBox llenando el AnchorPane */
+    private void ensureListadoUI() {
+        if (spListado == null || boxListado == null) {
+            desktopPane.getChildren().clear();
+
+            spListado = new ScrollPane();
+            spListado.setFitToWidth(true);
+            spListado.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+            spListado.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+            spListado.setStyle("-fx-background-color:transparent;");
+
+            boxListado = new VBox(10);
+            boxListado.setStyle("-fx-padding:16;");
+            spListado.setContent(boxListado);
+
+            AnchorPane.setTopAnchor(spListado, 0.0);
+            AnchorPane.setRightAnchor(spListado, 0.0);
+            AnchorPane.setBottomAnchor(spListado, 0.0);
+            AnchorPane.setLeftAnchor(spListado, 0.0);
+
+            desktopPane.getChildren().add(spListado);
+        }
+    }
+
+    /** Crea una tarjeta (ventanita no movible) clicable para cada finca */
+    private Node crearTarjetaFinca(com.piscicultura.monitoreo.model.GranjaPiscicola finca) {
+        BorderPane card = new BorderPane();
+        // Estilo base de tarjeta
+        card.setStyle("""
+            -fx-background-color: white;
+            -fx-background-radius: 12;
+            -fx-border-radius: 12;
+            -fx-border-color: #dfe6e9;
+            -fx-border-width: 1;
+            -fx-cursor: hand;
+        """);
+
+        // ======= Cabecera =======
+        Label lblTitulo = new Label("Finca #" + finca.getIdGranja() + " — " + safe(finca.getNombre()));
+        lblTitulo.setStyle("-fx-font-weight: 700; -fx-text-fill: #2c3e50; -fx-font-size: 14px;");
+
+        Button btnAbrir = new Button("Abrir");
+        btnAbrir.setOnAction(e -> abrirDetalleFinca(finca));
+
+        HBox header = new HBox(lblTitulo, new Region(), btnAbrir);
+        HBox.setHgrow(header.getChildren().get(1), Priority.ALWAYS);
+        header.setPadding(new Insets(10, 12, 8, 12));
+
+        // ======= Contenido =======
+        VBox info = new VBox(4,
+                new Label("Ubicación: " + safe(finca.getUbicacion())),
+                new Label("Longitud: " + finca.getLongitud() + " m"),
+                new Label("Área total: " + finca.getAreaTotal() + " m²")
+        );
+        info.setStyle("-fx-text-fill:#455a64; -fx-font-size:12px;");
+        BorderPane.setMargin(info, new Insets(0, 12, 12, 12));
+
+        // Interacciones visuales
+        card.setOnMouseEntered(e -> card.setStyle(card.getStyle()
+                + "; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.09), 14,0,0,3);"));
+        card.setOnMouseExited(e -> card.setStyle("""
+            -fx-background-color: white;
+            -fx-background-radius: 12;
+            -fx-border-radius: 12;
+            -fx-border-color: #dfe6e9;
+            -fx-border-width: 1;
+            -fx-cursor: hand;
+        """));
+
+        // Click en toda la tarjeta
+        card.setOnMouseClicked(e -> abrirDetalleFinca(finca));
+
+        card.setTop(header);
+        card.setCenter(info);
+        return card;
+    }
+
+    private void abrirDetalleFinca(com.piscicultura.monitoreo.model.GranjaPiscicola finca) {
+        try {
+            javafx.fxml.FXMLLoader loader =
+                new javafx.fxml.FXMLLoader(getClass().getResource("/com/piscicultura/monitoreo/view/estanque.fxml"));
+            Pane root = loader.load();
+
+            // === SNAPSHOT del contenido actual del desktopPane ===
+            // (esto captura EXACTAMENTE lo que había antes de abrir estanques)
+            List<Node> prevChildrenSnapshot = new ArrayList<>(desktopPane.getChildren());
+
+            com.piscicultura.monitoreo.controller.EstanqueController ctrl = loader.getController();
+
+            // Acción de volver: restaurar el snapshot tal cual estaba
+            Runnable onBack = () -> {
+                System.out.println("[CrudFincaController] RUN volver -> restaurando snapshot");
+                desktopPane.getChildren().setAll(prevChildrenSnapshot);
+            };
+
+            // pasa onBack al controller de estanques
+            ctrl.initData(finca, conn, onBack);
+
+            // reemplaza por la vista de estanques
+            desktopPane.getChildren().setAll(root);
+            AnchorPane.setTopAnchor(root, 0.0);
+            AnchorPane.setRightAnchor(root, 0.0);
+            AnchorPane.setBottomAnchor(root, 0.0);
+            AnchorPane.setLeftAnchor(root, 0.0);
+
+            setEstado("Estanques de: " + safe(finca.getNombre()), false);
+
+        } catch (Exception ex) {
+            setEstado("No se pudo abrir los estanques: " + ex.getMessage(), true);
+            ex.printStackTrace();
+        }
+    }
+
+
+    // =====================================================================================
+
     /** Parsea un número float desde UI; acepta coma o punto decimal. Devuelve null si es inválido. */
+    
     private Float parseFloatUI(String txt) {
         if (txt == null) return null;
         String s = txt.trim();
@@ -243,12 +366,13 @@ public class CrudFincaController implements Initializable {
         }
     }
 
-
     @FXML
     private void onCancelar() {
         limpiarFormulario();
         setEstado("Operación cancelada.", false);
     }
+    
+    
 
     private void limpiarFormulario() {
         txtNombre.clear();
@@ -259,92 +383,34 @@ public class CrudFincaController implements Initializable {
         cboMunicipio.setDisable(true);
     }
 
+    // CrudFincaController.java
     private void setEstado(String msg, boolean error) {
-        lblEstado.setText(msg);
-        lblEstado.setStyle(error ? "-fx-text-fill:#c62828;" : "-fx-text-fill:#2e7d32;");
-    }
-    
-    private Node crearVentanaInterna(com.piscicultura.monitoreo.model.GranjaPiscicola finca) {
-    BorderPane root = new BorderPane();
-    root.setStyle("""
-        -fx-background-color: white;
-        -fx-border-color: #b0bec5;
-        -fx-border-width: 1;
-        -fx-background-radius: 10;
-        -fx-border-radius: 10;
-        -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10,0,0,2);
-    """);
-
-    // ======= Cabecera =======
-    Label lblTitulo = new Label("Finca #" + finca.getIdGranja());
-    lblTitulo.setStyle("-fx-font-weight:bold; -fx-text-fill:#37474f;");
-
-    Button btnCerrar = new Button("×");
-    btnCerrar.setStyle("""
-        -fx-background-color:transparent;
-        -fx-text-fill:#78909c;
-        -fx-font-size:16px;
-    """);
-    btnCerrar.setOnAction(e -> ((Pane)root.getParent()).getChildren().remove(root));
-
-    HBox header = new HBox(lblTitulo, new Region(), btnCerrar);
-    HBox.setHgrow(header.getChildren().get(1), Priority.ALWAYS);
-    header.setPadding(new Insets(6,8,6,10));
-    header.setStyle("-fx-background-color:linear-gradient(to bottom,#e8f3ff,#dcecff);"
-                    + "-fx-background-radius:10 10 0 0; -fx-border-color:#cfd8dc; -fx-border-width:0 0 1 0;");
-
-    // Drag
-    makeDraggable(root, header);
-
-    // ======= Contenido =======
-    VBox info = new VBox(6);
-    info.setPadding(new Insets(8));
-    info.getChildren().addAll(
-        new Label("Nombre: " + finca.getNombre()),
-        new Label("Ubicación: " + finca.getUbicacion()),
-        new Label("Longitud: " + finca.getLongitud() + " m"),
-        new Label("Área total: " + finca.getAreaTotal() + " m²")
-    );
-    ScrollPane scroll = new ScrollPane(info);
-    scroll.setFitToWidth(true);
-    scroll.setStyle("-fx-background-color:transparent;");
-
-    root.setTop(header);
-    root.setCenter(scroll);
-    root.setOnMouseClicked(e -> root.toFront());
-
-    return root;
+        if (lblEstado != null) {
+            lblEstado.setText(msg);
+            lblEstado.setStyle(error ? "-fx-text-fill:#c62828;" : "-fx-text-fill:#2e7d32;");
+        } else {
+            System.out.println((error ? "[ERROR] " : "[INFO] ") + msg);
+        }
     }
 
-    /** Permite arrastrar la ventana dentro del desktopPane */
-    private void makeDraggable(Node node, Node handle) {
-        final double[] offset = new double[2];
-        handle.setOnMousePressed(e -> {
-            offset[0] = e.getSceneX() - node.getLayoutX();
-            offset[1] = e.getSceneY() - node.getLayoutY();
-            node.toFront();
-        });
-        handle.setOnMouseDragged(e -> {
-            double nx = e.getSceneX() - offset[0];
-            double ny = e.getSceneY() - offset[1];
-            nx = Math.max(0, Math.min(nx, desktopPane.getWidth() - ((Region) node).getWidth()));
-            ny = Math.max(0, Math.min(ny, desktopPane.getHeight() - ((Region) node).getHeight()));
-            node.setLayoutX(nx);
-            node.setLayoutY(ny);
-        });
-    }
     @FXML
     private void onActualizar() {
-        onVerFincas(); // reutiliza la lógica que ya tienes
+        onVerFincas(); // repuebla la lista
     }
 
     @FXML
     private void onCerrarTodas() {
-        if (desktopPane != null) {
+        // Limpia el contenido del listado (sin destruir el ScrollPane)
+        if (boxListado != null) {
+            boxListado.getChildren().clear();
+            setEstado("Listado vacío.", false);
+        } else if (desktopPane != null) {
             desktopPane.getChildren().clear();
-            setEstado("Ventanas cerradas.", false);
+            setEstado("Listado vacío.", false);
         }
     }
 
-
+    private String safe(String s) {
+        return (s == null) ? "" : s;
+    }
 }

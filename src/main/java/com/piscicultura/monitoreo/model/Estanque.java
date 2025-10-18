@@ -47,7 +47,6 @@ public class Estanque {
 
     public boolean validarCondiciones(Especie especie) {
         for (Parametro p : especie.getParametros()) {
-            // Validar
         }
         return true;
     }
@@ -58,19 +57,19 @@ public class Estanque {
 
     public int getIdEstanque() { return idEstanque; }
     public void setIdEstanque(int idEstanque) { this.idEstanque = idEstanque; }
-
+    
     public String getTipo() { return tipo; }
     public void setTipo(String tipo) { this.tipo = tipo; }
-
+    
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
-
+    
     public float getCapacidad() { return capacidad; }
     public void setCapacidad(float capacidad) { this.capacidad = capacidad; }
-
+    
     public float getTemperaturaAgua() { return temperaturaAgua; }
     public void setTemperaturaAgua(float temperaturaAgua) { this.temperaturaAgua = temperaturaAgua; }
-
+    
     public float getPhAgua() { return phAgua; }
     public void setPhAgua(float phAgua) { this.phAgua = phAgua; }
 
@@ -81,5 +80,10 @@ public class Estanque {
     public void setAmoniaco(float amoniaco) { this.amoniaco = amoniaco; }
 
     public List<Especie> getEspecies() { return especies; }
+ 
+    public void setEspecies(List<Especie> especies) {
+        this.especies = especies != null ? especies : new ArrayList<>();
+    }
+    
     public List<Sensor> getSensores() { return sensores; }
 }

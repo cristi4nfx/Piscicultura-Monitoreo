@@ -51,5 +51,4 @@ public class GranjaPiscicola {
     public List<Estanque> getEstanques() { return estanques; }
     public void setEstanques(List<Estanque> estanques) { this.estanques = estanques; }
 
-
 }

@@ -191,4 +191,96 @@ public class UsuarioDAO {
             throw new RuntimeException("Error al encriptar contraseña", e);
         }
     }
+    
+   // =========================================================
+   // ===============  RECUPERACIÓN CONTRASEÑA  ===============
+   // =========================================================
+
+   /** Verifica si el email existe en el sistema */
+   public boolean existeEmail(String email) {
+       final String sql = "SELECT id FROM usuarios WHERE email = ? AND activo = true";
+       try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
+           stmt.setString(1, email);
+           try (ResultSet rs = stmt.executeQuery()) {
+               return rs.next();
+           }
+       } catch (SQLException e) {
+           e.printStackTrace();
+           return false;
+       }
+   }
+
+   /** Genera un código de recuperación y lo envía por email */
+   public String generarTokenRecuperacion(String email) {
+       String codigo = com.piscicultura.monitoreo.util.EmailService.generarCodigo();
+
+       final String sql = "UPDATE usuarios SET token_recuperacion = ?, " +
+                         "fecha_expiracion_token = ? WHERE email = ? AND activo = true";
+
+       try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
+           // Token expira en 1 hora
+           java.sql.Timestamp expiracion = new java.sql.Timestamp(
+               System.currentTimeMillis() + (60 * 60 * 1000)
+           );
+
+           stmt.setString(1, codigo);
+           stmt.setTimestamp(2, expiracion);
+           stmt.setString(3, email);
+
+           int filasActualizadas = stmt.executeUpdate();
+
+           if (filasActualizadas > 0) {
+               // Enviar email con el código
+               com.piscicultura.monitoreo.util.EmailService emailService = new com.piscicultura.monitoreo.util.EmailService();
+               boolean emailEnviado = emailService.enviarCodigoRecuperacion(email, codigo);
+
+               if (emailEnviado) {
+                   return "EMAIL_ENVIADO";
+               } else {
+                   // Si falla el email, borrar el token
+                   limpiarToken(email);
+                   return null;
+               }
+           }
+       } catch (SQLException e) {
+           e.printStackTrace();
+       }
+
+       return null;
+   }
+
+   /** Cambia la contraseña usando un token válido */
+   public boolean cambiarPasswordConToken(String token, String nuevaPassword) {
+       final String sql = "UPDATE usuarios SET contraseña = ?, token_recuperacion = NULL, " +
+                         "fecha_expiracion_token = NULL " +
+                         "WHERE token_recuperacion = ? AND fecha_expiracion_token > ? AND activo = true";
+
+       try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
+           String hashNuevaPassword = encriptarSHA256(nuevaPassword);
+           java.sql.Timestamp ahora = new java.sql.Timestamp(System.currentTimeMillis());
+
+           stmt.setString(1, hashNuevaPassword);
+           stmt.setString(2, token);
+           stmt.setTimestamp(3, ahora);
+
+           int filasActualizadas = stmt.executeUpdate();
+           return filasActualizadas > 0;
+
+       } catch (SQLException e) {
+           e.printStackTrace();
+           return false;
+       }
+   }
+
+   // Método auxiliar para limpiar token si falla el email
+   private void limpiarToken(String email) {
+       final String sql = "UPDATE usuarios SET token_recuperacion = NULL, " +
+                         "fecha_expiracion_token = NULL WHERE email = ?";
+       try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
+           stmt.setString(1, email);
+           stmt.executeUpdate();
+       } catch (SQLException e) {
+           e.printStackTrace();
+       }
+   }
 }

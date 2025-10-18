@@ -15,6 +15,11 @@ import com.piscicultura.monitoreo.util.ConexionDB;
 import java.sql.Connection;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 public class LoginController {
 
@@ -113,6 +118,29 @@ public class LoginController {
             lblMensaje.setStyle("-fx-text-fill: red;");
             lblMensaje.setText("❌ Error al validar credenciales.");
             e.printStackTrace();
+        }
+    }
+    
+    @FXML
+    private void handleRecuperarPassword() {
+        try {
+            // Cargar la vista de recuperación de contraseña
+            FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/com/piscicultura/monitoreo/view/recuperarPassword.fxml")
+            );
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Recuperar Contraseña - Sistema Piscicultura");
+            stage.setScene(new Scene(root));
+            stage.setResizable(false);
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            lblMensaje.setStyle("-fx-text-fill: red;");
+            lblMensaje.setText("❌ Error al abrir recuperación de contraseña.");
         }
     }
 }

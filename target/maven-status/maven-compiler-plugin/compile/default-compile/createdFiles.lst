@@ -1,6 +1,8 @@
 com\piscicultura\monitoreo\model\Parametro.class
 com\piscicultura\monitoreo\model\Rol.class
+com\piscicultura\monitoreo\controller\TecnicoController.class
 com\piscicultura\monitoreo\util\TestConexion.class
+com\piscicultura\monitoreo\model\Notificable.class
 com\piscicultura\monitoreo\util\ConexionDB.class
 com\piscicultura\monitoreo\model\Estanque.class
 com\piscicultura\monitoreo\controller\CrudController$1.class
@@ -18,9 +20,11 @@ com\piscicultura\monitoreo\dao\SensorDAO.class
 com\piscicultura\monitoreo\controller\EstanqueController.class
 com\piscicultura\monitoreo\model\Usuario.class
 com\piscicultura\monitoreo\model\Investigador.class
+com\piscicultura\monitoreo\model\Alarma.class
 com\piscicultura\monitoreo\App.class
 com\piscicultura\monitoreo\controller\EstanqueController$DialogResult.class
 com\piscicultura\monitoreo\util\TestLogin.class
+com\piscicultura\monitoreo\model\AccionCorrectiva.class
 com\piscicultura\monitoreo\model\Administrador.class
 com\piscicultura\monitoreo\controller\EstanqueController$2.class
 com\piscicultura\monitoreo\controller\LoginController.class

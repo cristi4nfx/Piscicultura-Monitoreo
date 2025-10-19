@@ -76,59 +76,55 @@ public class EstanqueDAO {
     // ============================
     // READ: listar por finca (con especies)
     // ============================
-    public List<Estanque> listarPorFincaConEspecies(int idFinca) throws SQLException {
-        // Trae estanques y sus especies en una sola consulta
-        final String sql = """
-            SELECT  e.id_estanque, e.id_finca, e.tipo, e.estado, e.capacidad,
-                    e.temperatura_agua, e.ph_agua, e.oxigeno, e.amoniaco,
-                    s.id_especie, s.nombre_cientifico, s.nombre_comun, 
-                    ee.cantidad AS rel_cantidad, ee.fecha_siembra AS rel_fecha_siembra
-            FROM estanques e
-            LEFT JOIN estanque_especie ee ON ee.id_estanque = e.id_estanque
-            LEFT JOIN especie s ON s.id_especie = ee.id_especie
-            WHERE e.id_finca = ?
-            ORDER BY e.id_estanque, s.nombre_comun
-        """;
+public List<Estanque> listarPorFincaConEspecies(int idFinca) throws SQLException {
+    String sql = """
+        SELECT e.id_estanque, e.id_finca, e.tipo, e.estado, e.capacidad,
+               e.temperatura_agua, e.ph_agua, e.oxigeno, e.amoniaco,
+               s.id_especie, s.nombre_cientifico, s.nombre_comun, s.edad_dias,
+               s.peso_promedio_g, s.fecha_siembra, s.cantidad
+        FROM estanques e
+        LEFT JOIN especie s ON s.id_especie = e.id_especie
+        WHERE e.id_finca = ?
+        ORDER BY e.id_estanque
+    """;
 
-        Map<Integer, Estanque> byId = new LinkedHashMap<>();
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, idFinca);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    int idEst = rs.getInt("id_estanque");
-                    Estanque est = byId.get(idEst);
-                    if (est == null) {
-                        est = new Estanque();
-                        est.setIdEstanque(idEst);
-                        est.setTipo(nullSafe(rs.getString("tipo")));
-                        est.setEstado(nullSafe(rs.getString("estado")));
-                        est.setCapacidad(rs.getFloat("capacidad"));
-                        est.setTemperaturaAgua(rs.getFloat("temperatura_agua"));
-                        est.setPhAgua(rs.getFloat("ph_agua"));
-                        est.setOxigeno(rs.getFloat("oxigeno"));
-                        est.setAmoniaco(rs.getFloat("amoniaco"));
-                        // asume que Estanque tiene: private List<Especie> especies = new ArrayList<>();
-                        byId.put(idEst, est);
-                    }
+    List<Estanque> out = new ArrayList<>();
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, idFinca);
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Estanque est = new Estanque();
+                est.setIdEstanque(rs.getInt("id_estanque"));
+                est.setTipo(nullSafe(rs.getString("tipo")));
+                est.setEstado(nullSafe(rs.getString("estado")));
+                est.setCapacidad(rs.getFloat("capacidad"));
+                est.setTemperaturaAgua(rs.getFloat("temperatura_agua"));
+                est.setPhAgua(rs.getFloat("ph_agua"));
+                est.setOxigeno(rs.getFloat("oxigeno"));
+                est.setAmoniaco(rs.getFloat("amoniaco"));
 
-                    int idEsp = rs.getInt("id_especie");
-                    if (!rs.wasNull()) {
-                        Especie esp = new Especie();
-                        esp.setIdEspecie(idEsp);
-                        esp.setNombreCientifico(nullSafe(rs.getString("nombre_cientifico")));
-                        esp.setNombreComun(nullSafe(rs.getString("nombre_comun")));
-                        // datos de la relación:
-                        esp.setCantidad(rs.getInt("rel_cantidad"));
-                        if (rs.wasNull()) esp.setCantidad(0);
-                        esp.setFechaSiembra(rs.getDate("rel_fecha_siembra"));
-
-                        est.agregarEspecie(esp);
-                    }
+                // Especie (si existe)
+                Integer idEsp = (Integer) rs.getObject("id_especie");
+                if (idEsp != null) {
+                    Especie esp = new Especie();
+                    esp.setIdEspecie(idEsp);
+                    esp.setNombreCientifico(nullSafe(rs.getString("nombre_cientifico")));
+                    esp.setNombreComun(nullSafe(rs.getString("nombre_comun")));
+                    esp.setEdadDias(rs.getInt("edad_dias"));
+                    esp.setPesoPromedioG(rs.getFloat("peso_promedio_g"));
+                    esp.setFechaSiembra(rs.getDate("fecha_siembra"));
+                    esp.setCantidad(rs.getInt("cantidad"));
+                    est.setEspecies(new ArrayList<>(List.of(esp)));
+                } else {
+                    est.setEspecies(new ArrayList<>()); // lista vacía para que la UI no muera
                 }
+
+                out.add(est);
             }
         }
-        return new ArrayList<>(byId.values());
     }
+    return out;
+}
 
     // ============================
     // UPDATE (estanque)

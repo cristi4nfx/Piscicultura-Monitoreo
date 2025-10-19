@@ -1,0 +1,57 @@
+/* Tarjeta contenedora */
+.card {
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #fbfbfb);
+    -fx-background-radius: 12;
+    -fx-border-color: #e6e8ec;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 12, 0.15, 0, 2);
+    -fx-padding: 12;
+}
+
+.card-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #2c3e50;
+}
+
+.status-chip {
+    -fx-background-color: #f7f8fa;
+    -fx-background-radius: 999;
+    -fx-padding: 6 12;
+    -fx-alignment: center-left;
+    -fx-spacing: 8;
+    -fx-border-color: #e6e8ec;
+    -fx-border-width: 1;
+    -fx-border-radius: 999;
+}
+
+.color-dot {
+    -fx-min-width: 10px;
+    -fx-min-height: 10px;
+    -fx-max-width: 10px;
+    -fx-max-height: 10px;
+    -fx-background-radius: 50%;
+}
+
+.ok      { -fx-background-color: #12b886; }
+.warn    { -fx-background-color: #f59f00; }
+.crit    { -fx-background-color: #e03131; }
+
+.metric-name  { -fx-text-fill: #334155; -fx-font-weight: 600; }
+.metric-value { -fx-text-fill: #475569; -fx-font-weight: 700; }
+.metric-unit  { -fx-text-fill: #6b7280; }
+.state-label  { -fx-text-fill: #334155; -fx-font-weight: 700; }
+
+.vsep {
+    -fx-background-color: #e6e8ec;
+    -fx-min-width: 1px;
+    -fx-max-width: 1px;
+    -fx-min-height: 16px;
+    -fx-max-height: 16px;
+}
+
+.grid-2col {
+    -fx-hgap: 10;
+    -fx-vgap: 10;
+}

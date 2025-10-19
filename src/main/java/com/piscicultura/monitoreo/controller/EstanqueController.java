@@ -20,6 +20,7 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+import javafx.geometry.Pos;
 
 public class EstanqueController implements Initializable {
 
@@ -91,62 +92,94 @@ public class EstanqueController implements Initializable {
     }
 
     private Node crearTarjetaEstanque(Estanque est) {
-        BorderPane card = new BorderPane();
-        card.setStyle("""
-            -fx-background-color: white;
-            -fx-background-radius: 12;
-            -fx-border-radius: 12;
-            -fx-border-color: #dfe6e9;
-            -fx-border-width: 1;
-            -fx-cursor: hand;
-        """);
+       BorderPane card = new BorderPane();
+       card.setStyle("""
+           -fx-background-color: white;
+           -fx-background-radius: 12;
+           -fx-border-radius: 12;
+           -fx-border-color: #dfe6e9;
+           -fx-border-width: 1;
+           -fx-cursor: hand;
+       """);
 
-        Label t = new Label("Estanque #" + est.getIdEstanque() + " — " + safe(est.getTipo()));
-        t.setStyle("-fx-font-weight: 700; -fx-text-fill: #2c3e50; -fx-font-size: 14px;");
+       Label t = new Label("Estanque #" + est.getIdEstanque() + " — " + safe(est.getTipo()));
+       t.setStyle("-fx-font-weight: 700; -fx-text-fill: #2c3e50; -fx-font-size: 14px;");
 
-        Button btnAbrir = new Button("Abrir");
-        btnAbrir.setOnAction(e -> abrirDetalleEstanque(est));
+       // --- Botón Abrir ---
+       Button btnAbrir = new Button("Abrir");
+       btnAbrir.setStyle("""
+           -fx-background-color:#1976d2;
+           -fx-text-fill:white;
+           -fx-font-weight:bold;
+           -fx-background-radius:6;
+           -fx-cursor: hand;
+       """);
+       btnAbrir.setPadding(new Insets(4, 10, 4, 10));
+       btnAbrir.setOnAction(e -> abrirDetalleEstanque(est));
 
-        HBox header = new HBox(t, new Region(), btnAbrir);
-        HBox.setHgrow(header.getChildren().get(1), Priority.ALWAYS);
-        header.setPadding(new Insets(10, 12, 8, 12));
+       // --- Botón Eliminar ---
+       Button btnEliminar = new Button("Eliminar");
+       btnEliminar.setStyle("""
+           -fx-background-color:#e53935;
+           -fx-text-fill:white;
+           -fx-font-weight:bold;
+           -fx-background-radius:6;
+           -fx-cursor: hand;
+       """);
+       btnEliminar.setPadding(new Insets(4, 10, 4, 10));
+       btnEliminar.setOnAction(e -> {
+           e.consume(); // evita que abra el detalle
+           eliminarEstanque(est, card);
+       });
 
-        String especiesTexto = (est.getEspecies() == null || est.getEspecies().isEmpty())
-                ? "—"
-                : est.getEspecies().stream()
-                    .map(esp -> safe(esp.getNombreComun()))
-                    .collect(Collectors.joining(", "));
+       // --- Encabezado con separación estética ---
+       Region spacer = new Region();
+       HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        String lineaCalidad = String.format("pH: %s · O₂: %s mg/L · NH₃: %s mg/L",
-                fmt(est.getPhAgua()), fmt(est.getOxigeno()), fmt(est.getAmoniaco()));
+       HBox header = new HBox(10, t, spacer, btnAbrir, btnEliminar); // 10 px de espacio
+       header.setAlignment(Pos.CENTER_LEFT);
+       header.setPadding(new Insets(10, 12, 8, 12));
 
-        VBox info = new VBox(4,
-                new Label("Estado: " + safe(est.getEstado())),
-                new Label("Capacidad: " + fmt(est.getCapacidad()) + " m³"),
-                new Label("Especies: " + especiesTexto),
-                new Label("T° agua: " + fmt(est.getTemperaturaAgua()) + " °C"),
-                new Label(lineaCalidad)
-        );
-        info.setStyle("-fx-text-fill:#455a64; -fx-font-size:12px;");
-        BorderPane.setMargin(info, new Insets(0, 12, 12, 12));
+       // --- Contenido principal ---
+       String especiesTexto = (est.getEspecies() == null || est.getEspecies().isEmpty())
+               ? "—"
+               : est.getEspecies().stream()
+                   .map(esp -> safe(esp.getNombreComun()))
+                   .collect(Collectors.joining(", "));
 
-        card.setOnMouseEntered(e -> card.setStyle(card.getStyle()
-                + "; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.09), 14,0,0,3);"));
-        card.setOnMouseExited(e -> card.setStyle("""
-            -fx-background-color: white;
-            -fx-background-radius: 12;
-            -fx-border-radius: 12;
-            -fx-border-color: #dfe6e9;
-            -fx-border-width: 1;
-            -fx-cursor: hand;
-        """));
+       String lineaCalidad = String.format("pH: %s · O₂: %s mg/L · NH₃: %s mg/L",
+               fmt(est.getPhAgua()), fmt(est.getOxigeno()), fmt(est.getAmoniaco()));
 
-        card.setOnMouseClicked(e -> abrirDetalleEstanque(est));
+       VBox info = new VBox(4,
+               new Label("Estado: " + safe(est.getEstado())),
+               new Label("Capacidad: " + fmt(est.getCapacidad()) + " m³"),
+               new Label("Especies: " + especiesTexto),
+               new Label("T° agua: " + fmt(est.getTemperaturaAgua()) + " °C"),
+               new Label(lineaCalidad)
+       );
+       info.setStyle("-fx-text-fill:#455a64; -fx-font-size:12px;");
+       BorderPane.setMargin(info, new Insets(0, 12, 12, 12));
 
-        card.setTop(header);
-        card.setCenter(info);
-        return card;
-    }
+       // --- Efectos hover ---
+       card.setOnMouseEntered(e -> card.setStyle(card.getStyle()
+               + "; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.09), 14,0,0,3);"));
+       card.setOnMouseExited(e -> card.setStyle("""
+           -fx-background-color: white;
+           -fx-background-radius: 12;
+           -fx-border-radius: 12;
+           -fx-border-color: #dfe6e9;
+           -fx-border-width: 1;
+           -fx-cursor: hand;
+       """));
+
+       // --- Click en tarjeta abre detalle (excepto si se presiona Eliminar) ---
+       card.setOnMouseClicked(e -> abrirDetalleEstanque(est));
+
+       card.setTop(header);
+       card.setCenter(info);
+       return card;
+   }
+
 
     // ================== Acciones UI ==================
     @FXML
@@ -396,9 +429,33 @@ public class EstanqueController implements Initializable {
         }
     }
 
-    private void abrirDetalleEstanque(Estanque est) {
-        setEstado("Abriste detalle de estanque #" + est.getIdEstanque(), false);
+private void abrirDetalleEstanque(Estanque est) {
+    try {
+        javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+            getClass().getResource("/com/piscicultura/monitoreo/view/estanque_detalle.fxml")
+        );
+        Pane root = loader.load();
+
+        com.piscicultura.monitoreo.controller.EstanqueDetalleController ctrl = loader.getController();
+        // Le pasas el estanque actual y la conexión (para histórico opcional)
+        ctrl.init(est, conn);
+
+        javafx.stage.Stage dlg = new javafx.stage.Stage();
+        dlg.setTitle("Detalle del Estanque #" + est.getIdEstanque());
+        dlg.setScene(new javafx.scene.Scene(root));
+        //dlg.initOwner(lblTitulo.getScene().getWindow());
+        dlg.initModality(javafx.stage.Modality.WINDOW_MODAL);
+        dlg.setResizable(true);
+        dlg.show();
+
+        setEstado("Detalle abierto del estanque #" + est.getIdEstanque(), false);
+
+    } catch (Exception ex) {
+        setEstado("No se pudo abrir el detalle: " + ex.getMessage(), true);
+        ex.printStackTrace();
     }
+}
+
 
     // ================== Utilidades ==================
     private void setEstado(String msg, boolean error) {
@@ -464,4 +521,58 @@ public class EstanqueController implements Initializable {
         if (s.endsWith(".0")) s = s.substring(0, s.length()-2);
         return s;
     }
+        /** Elimina un estanque (confirmando con el usuario), borra en BD si aplica, 
+     *  lo quita de las listas en memoria y refresca el listado. */
+    private void eliminarEstanque(Estanque est, Node cardNode) {
+        if (est == null) {
+            setEstado("Estanque nulo.", true);
+            return;
+        }
+
+        // 1) Confirmación
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Eliminar estanque");
+        confirm.setHeaderText("¿Eliminar el estanque #" + est.getIdEstanque() + "?");
+        confirm.setContentText("Esta acción no se puede deshacer.");
+        Optional<ButtonType> r = confirm.showAndWait();
+        if (r.isEmpty() || r.get() != ButtonType.OK) {
+            setEstado("Eliminación cancelada.", false);
+            return;
+        }
+
+        try {
+            // 2) Si hay BD y el id es real (>0), borramos en BD
+            if (conn != null && !conn.isClosed() && est.getIdEstanque() > 0) {
+                com.piscicultura.monitoreo.dao.EstanqueDAO dao =
+                        new com.piscicultura.monitoreo.dao.EstanqueDAO(conn);
+
+                // Sugerido: si tu DAO tiene un método "eliminarCompleto" que borre hijas (especie, mediciones, alarmas)
+                // boolean ok = dao.eliminarCompleto(est.getIdEstanque());
+                // Si no, usa eliminar() simple:
+                boolean ok = dao.eliminar(est.getIdEstanque());
+
+                if (!ok) {
+                    setEstado("No se pudo eliminar el estanque en BD (id " + est.getIdEstanque() + ").", true);
+                    return;
+                }
+            }
+
+            // 3) Quitar de listas en memoria (finca y caché)
+            if (finca != null && finca.getEstanques() != null) {
+                finca.getEstanques().removeIf(e -> Objects.equals(e.getIdEstanque(), est.getIdEstanque()));
+            }
+            if (estanquesCache != null) {
+                estanquesCache.removeIf(e -> Objects.equals(e.getIdEstanque(), est.getIdEstanque()));
+            }
+
+            // 4) Refrescar UI
+            poblarListado(estanquesCache);
+            setEstado("Estanque #" + est.getIdEstanque() + " eliminado.", false);
+
+        } catch (Exception ex) {
+            setEstado("Error eliminando estanque: " + ex.getMessage(), true);
+            ex.printStackTrace();
+        }
+    }
+
 }

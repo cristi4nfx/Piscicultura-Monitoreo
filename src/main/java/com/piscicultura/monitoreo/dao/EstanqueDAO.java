@@ -2,6 +2,7 @@ package com.piscicultura.monitoreo.dao;
 
 import com.piscicultura.monitoreo.model.Especie;
 import com.piscicultura.monitoreo.model.Estanque;
+import com.piscicultura.monitoreo.model.Parametro;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -76,55 +77,67 @@ public class EstanqueDAO {
     // ============================
     // READ: listar por finca (con especies)
     // ============================
-public List<Estanque> listarPorFincaConEspecies(int idFinca) throws SQLException {
-    String sql = """
-        SELECT e.id_estanque, e.id_finca, e.tipo, e.estado, e.capacidad,
-               e.temperatura_agua, e.ph_agua, e.oxigeno, e.amoniaco,
-               s.id_especie, s.nombre_cientifico, s.nombre_comun, s.edad_dias,
-               s.peso_promedio_g, s.fecha_siembra, s.cantidad
-        FROM estanques e
-        LEFT JOIN especie s ON s.id_especie = e.id_especie
-        WHERE e.id_finca = ?
-        ORDER BY e.id_estanque
-    """;
+    public List<Estanque> listarPorFincaConEspecies(int idFinca) throws SQLException {
+        String sql = """
+            SELECT e.id_estanque, e.id_finca, e.tipo, e.estado, e.capacidad,
+                   e.temperatura_agua, e.ph_agua, e.oxigeno, e.amoniaco,
+                   s.id_especie, s.nombre_cientifico, s.nombre_comun, s.edad_dias,
+                   s.peso_promedio_g, s.fecha_siembra, s.cantidad
+            FROM estanques e
+            LEFT JOIN especie s ON s.id_especie = e.id_especie
+            WHERE e.id_finca = ?
+            ORDER BY e.id_estanque
+        """;
 
-    List<Estanque> out = new ArrayList<>();
-    try (PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setInt(1, idFinca);
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                Estanque est = new Estanque();
-                est.setIdEstanque(rs.getInt("id_estanque"));
-                est.setTipo(nullSafe(rs.getString("tipo")));
-                est.setEstado(nullSafe(rs.getString("estado")));
-                est.setCapacidad(rs.getFloat("capacidad"));
-                est.setTemperaturaAgua(rs.getFloat("temperatura_agua"));
-                est.setPhAgua(rs.getFloat("ph_agua"));
-                est.setOxigeno(rs.getFloat("oxigeno"));
-                est.setAmoniaco(rs.getFloat("amoniaco"));
+        List<Estanque> out = new ArrayList<>();
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idFinca);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Estanque est = new Estanque();
+                    est.setIdEstanque(rs.getInt("id_estanque"));
+                    est.setTipo(nullSafe(rs.getString("tipo")));
+                    est.setEstado(nullSafe(rs.getString("estado")));
+                    est.setCapacidad(rs.getFloat("capacidad"));
+                    est.setTemperaturaAgua(rs.getFloat("temperatura_agua"));
+                    est.setPhAgua(rs.getFloat("ph_agua"));
+                    est.setOxigeno(rs.getFloat("oxigeno"));
+                    est.setAmoniaco(rs.getFloat("amoniaco"));
 
-                // Especie (si existe)
-                Integer idEsp = (Integer) rs.getObject("id_especie");
-                if (idEsp != null) {
-                    Especie esp = new Especie();
-                    esp.setIdEspecie(idEsp);
-                    esp.setNombreCientifico(nullSafe(rs.getString("nombre_cientifico")));
-                    esp.setNombreComun(nullSafe(rs.getString("nombre_comun")));
-                    esp.setEdadDias(rs.getInt("edad_dias"));
-                    esp.setPesoPromedioG(rs.getFloat("peso_promedio_g"));
-                    esp.setFechaSiembra(rs.getDate("fecha_siembra"));
-                    esp.setCantidad(rs.getInt("cantidad"));
-                    est.setEspecies(new ArrayList<>(List.of(esp)));
-                } else {
-                    est.setEspecies(new ArrayList<>()); // lista vacía para que la UI no muera
+                    // Especie (si existe)
+                    Integer idEsp = (Integer) rs.getObject("id_especie");
+                    if (idEsp != null) {
+                        Especie esp = new Especie();
+                        esp.setIdEspecie(idEsp);
+                        esp.setNombreCientifico(nullSafe(rs.getString("nombre_cientifico")));
+                        esp.setNombreComun(nullSafe(rs.getString("nombre_comun")));
+                        esp.setEdadDias(rs.getInt("edad_dias"));
+                        esp.setPesoPromedioG(rs.getFloat("peso_promedio_g"));
+                        esp.setFechaSiembra(rs.getDate("fecha_siembra"));
+                        esp.setCantidad(rs.getInt("cantidad"));
+
+                        // ✅ NUEVO: CARGAR PARÁMETROS DE LA ESPECIE
+                        try {
+                            EspecieDAO especieDAO = new EspecieDAO(conn);
+                            List<Parametro> parametros = especieDAO.obtenerParametrosPorEspecie(idEsp);
+                            esp.getParametros().addAll(parametros);
+
+                            System.out.println("✅ Cargados " + parametros.size() + " parámetros para " + esp.getNombreComun());
+                        } catch (Exception e) {
+                            System.err.println("❌ Error cargando parámetros para especie " + idEsp + ": " + e.getMessage());
+                        }
+
+                        est.setEspecies(new ArrayList<>(List.of(esp)));
+                    } else {
+                        est.setEspecies(new ArrayList<>());
+                    }
+
+                    out.add(est);
                 }
-
-                out.add(est);
             }
         }
+        return out;
     }
-    return out;
-}
 
     // ============================
     // UPDATE (estanque)

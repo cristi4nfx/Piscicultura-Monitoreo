@@ -434,7 +434,7 @@ private void abrirDetalleEstanque(Estanque est) {
         javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
             getClass().getResource("/com/piscicultura/monitoreo/view/estanque_detalle.fxml")
         );
-        Pane root = loader.load();
+        Parent root = loader.load();
 
         com.piscicultura.monitoreo.controller.EstanqueDetalleController ctrl = loader.getController();
         // Le pasas el estanque actual y la conexión (para histórico opcional)
@@ -443,7 +443,6 @@ private void abrirDetalleEstanque(Estanque est) {
         javafx.stage.Stage dlg = new javafx.stage.Stage();
         dlg.setTitle("Detalle del Estanque #" + est.getIdEstanque());
         dlg.setScene(new javafx.scene.Scene(root));
-        //dlg.initOwner(lblTitulo.getScene().getWindow());
         dlg.initModality(javafx.stage.Modality.WINDOW_MODAL);
         dlg.setResizable(true);
         dlg.show();

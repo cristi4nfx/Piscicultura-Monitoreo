@@ -15,7 +15,6 @@
         <Button text="Volver" onAction="#onSalir"/>
         <Region HBox.hgrow="ALWAYS"/>
         <TextField fx:id="txtBuscar" promptText="Buscar por tipo/estado..." prefWidth="260"/>
-        <Button text="Filtrar" onAction="#onFiltrar"/>
         <Button text="Limpiar" onAction="#onLimpiarFiltro"/>
         <Button text="Nuevo Estanque" onAction="#onNuevoEstanque"/>
     </HBox>

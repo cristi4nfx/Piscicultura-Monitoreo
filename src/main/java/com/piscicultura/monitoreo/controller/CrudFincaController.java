@@ -259,58 +259,84 @@ public class CrudFincaController implements Initializable {
         }
     }
 
-    /** Crea una tarjeta (ventanita no movible) clicable para cada finca */
     private Node crearTarjetaFinca(com.piscicultura.monitoreo.model.GranjaPiscicola finca) {
-        BorderPane card = new BorderPane();
-        // Estilo base de tarjeta
-        card.setStyle("""
-            -fx-background-color: white;
-            -fx-background-radius: 12;
-            -fx-border-radius: 12;
-            -fx-border-color: #dfe6e9;
-            -fx-border-width: 1;
-            -fx-cursor: hand;
-        """);
+     BorderPane card = new BorderPane();
+     card.setStyle("""
+         -fx-background-color: white;
+         -fx-background-radius: 12;
+         -fx-border-radius: 12;
+         -fx-border-color: #dfe6e9;
+         -fx-border-width: 1;
+         -fx-cursor: hand;
+     """);
 
-        // ======= Cabecera =======
-        Label lblTitulo = new Label("Finca #" + finca.getIdGranja() + " — " + safe(finca.getNombre()));
-        lblTitulo.setStyle("-fx-font-weight: 700; -fx-text-fill: #2c3e50; -fx-font-size: 14px;");
+     Label lblTitulo = new Label("Finca #" + finca.getIdGranja() + " — " + safe(finca.getNombre()));
+     lblTitulo.setStyle("-fx-font-weight: 700; -fx-text-fill: #2c3e50; -fx-font-size: 14px;");
 
-        Button btnAbrir = new Button("Abrir");
-        btnAbrir.setOnAction(e -> abrirDetalleFinca(finca));
+     Button btnAbrir = new Button("Abrir");
+     btnAbrir.setOnAction(e -> abrirDetalleFinca(finca));
+     btnAbrir.setStyle("""
+         -fx-background-color:#1976d2;
+         -fx-text-fill:white;
+         -fx-font-weight:bold;
+         -fx-background-radius:6;
+         -fx-cursor: hand;
+     """);
+     btnAbrir.setPadding(new Insets(4, 10, 4, 10));
 
-        HBox header = new HBox(lblTitulo, new Region(), btnAbrir);
-        HBox.setHgrow(header.getChildren().get(1), Priority.ALWAYS);
-        header.setPadding(new Insets(10, 12, 8, 12));
+     Button btnEliminar = new Button("Eliminar");
+     btnEliminar.setStyle("""
+         -fx-background-color:#e53935;
+         -fx-text-fill:white;
+         -fx-font-weight:bold;
+         -fx-background-radius:6;
+         -fx-cursor: hand;
+     """);
+     // Padding para que no se vea "pegado"
+     btnEliminar.setPadding(new Insets(4, 10, 4, 10));
+     // Acción con e.consume() para no abrir el detalle al hacer click
+     btnEliminar.setOnAction(e -> {
+         e.consume();
+         eliminarFinca(finca);
+     });
 
-        // ======= Contenido =======
-        VBox info = new VBox(4,
-                new Label("Ubicación: " + safe(finca.getUbicacion())),
-                new Label("Longitud: " + finca.getLongitud() + " m"),
-                new Label("Área total: " + finca.getAreaTotal() + " m²")
-        );
-        info.setStyle("-fx-text-fill:#455a64; -fx-font-size:12px;");
-        BorderPane.setMargin(info, new Insets(0, 12, 12, 12));
+     // Separador elástico para empujar botones a la derecha
+     Region spacer = new Region();
+     HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // Interacciones visuales
-        card.setOnMouseEntered(e -> card.setStyle(card.getStyle()
-                + "; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.09), 14,0,0,3);"));
-        card.setOnMouseExited(e -> card.setStyle("""
-            -fx-background-color: white;
-            -fx-background-radius: 12;
-            -fx-border-radius: 12;
-            -fx-border-color: #dfe6e9;
-            -fx-border-width: 1;
-            -fx-cursor: hand;
-        """));
+     // HBox con espacio de 10px entre nodos
+     HBox header = new HBox(10, lblTitulo, spacer, btnAbrir, btnEliminar);
+     header.setAlignment(javafx.geometry.Pos.CENTER_LEFT); // usa Pos si ya lo importas
+     header.setPadding(new Insets(10, 12, 8, 12));
 
-        // Click en toda la tarjeta
-        card.setOnMouseClicked(e -> abrirDetalleFinca(finca));
+     VBox info = new VBox(4,
+             new Label("Ubicación: " + safe(finca.getUbicacion())),
+             new Label("Longitud: " + finca.getLongitud() + " m"),
+             new Label("Área total: " + finca.getAreaTotal() + " m²")
+     );
+     info.setStyle("-fx-text-fill:#455a64; -fx-font-size:12px;");
+     BorderPane.setMargin(info, new Insets(0, 12, 12, 12));
 
-        card.setTop(header);
-        card.setCenter(info);
-        return card;
-    }
+     card.setOnMouseEntered(e -> card.setStyle(card.getStyle()
+             + "; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.09), 14,0,0,3);"));
+     card.setOnMouseExited(e -> card.setStyle("""
+         -fx-background-color: white;
+         -fx-background-radius: 12;
+         -fx-border-radius: 12;
+         -fx-border-color: #dfe6e9;
+         -fx-border-width: 1;
+         -fx-cursor: hand;
+     """));
+
+     // Click en tarjeta abre detalle
+     card.setOnMouseClicked(e -> abrirDetalleFinca(finca));
+
+     card.setTop(header);
+     card.setCenter(info);
+     return card;
+ }
+
+
 
     private void abrirDetalleFinca(com.piscicultura.monitoreo.model.GranjaPiscicola finca) {
         try {
@@ -371,8 +397,65 @@ public class CrudFincaController implements Initializable {
         limpiarFormulario();
         setEstado("Operación cancelada.", false);
     }
-    
-    
+    private void eliminarFinca(com.piscicultura.monitoreo.model.GranjaPiscicola finca) {
+    if (finca == null) {
+        setEstado("Finca nula.", true);
+        return;
+    }
+
+    // Confirmación
+    javafx.scene.control.Alert confirm = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
+    confirm.setTitle("Eliminar finca");
+    confirm.setHeaderText("¿Eliminar la finca #" + finca.getIdGranja() + " ?");
+    confirm.setContentText("Se eliminará la finca y todos sus estanques y datos relacionados. Esta acción no se puede deshacer.");
+
+    Optional<javafx.scene.control.ButtonType> r = confirm.showAndWait();
+    if (r.isEmpty() || r.get() != javafx.scene.control.ButtonType.OK) {
+        setEstado("Eliminación cancelada.", false);
+        return;
+    }
+
+    // Borrado
+    try {
+        if (conn == null || conn.isClosed()) {
+            setEstado("No hay conexión a BD para eliminar.", true);
+            return;
+        }
+
+        // Transacción
+        boolean prevAuto = conn.getAutoCommit();
+        conn.setAutoCommit(false);
+        try {
+            com.piscicultura.monitoreo.dao.Granja_PiscicolaDAO dao =
+                    new com.piscicultura.monitoreo.dao.Granja_PiscicolaDAO(conn);
+
+            // Método que ELIMINA TODO lo relacionado a la finca:
+            // - relaciones de estanques (mediciones, alarmas, estanque_especie, etc.)
+            // - estanques
+            // - la finca
+            boolean ok = dao.eliminarCompleta(finca.getIdGranja());
+            if (!ok) {
+                conn.rollback();
+                setEstado("No se pudo eliminar la finca (sin filas afectadas).", true);
+                return;
+            }
+            conn.commit();
+            setEstado("Finca #" + finca.getIdGranja() + " eliminada.", false);
+        } catch (Exception ex) {
+            conn.rollback();
+            throw ex;
+        } finally {
+            conn.setAutoCommit(prevAuto);
+        }
+
+        // Refrescar listado
+        onVerFincas();
+
+    } catch (Exception ex) {
+        setEstado("Error eliminando finca: " + ex.getMessage(), true);
+        ex.printStackTrace();
+    }
+}
 
     private void limpiarFormulario() {
         txtNombre.clear();

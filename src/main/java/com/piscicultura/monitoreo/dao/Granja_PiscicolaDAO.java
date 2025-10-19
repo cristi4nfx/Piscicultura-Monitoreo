@@ -98,15 +98,43 @@ public class Granja_PiscicolaDAO {
         }
     }
 
-    /** Elimina una finca por ID. Retorna true si se borró alguna fila. */
-    public boolean eliminarPorId(int id) {
-        final String sql = "DELETE FROM fincas WHERE id = ?";
-        try (PreparedStatement ps = conexion.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
+    /** Elimina la finca y TODOS sus estanques (sin ON DELETE CASCADE). */
+    public boolean eliminarCompleta(int idFinca) {
+        boolean prevAutoCommit = true;
+        try {
+            prevAutoCommit = conexion.getAutoCommit();
+            conexion.setAutoCommit(false);
+
+            // 1) Borrar estanques de la finca
+            try (PreparedStatement psEst = conexion.prepareStatement(
+                    "DELETE FROM estanques WHERE id_finca = ?")) {
+                psEst.setInt(1, idFinca);
+                psEst.executeUpdate(); // no importa cuántos, puede ser 0
+            }
+
+            // 2) Borrar la finca
+            int filasFinca;
+            try (PreparedStatement psFinca = conexion.prepareStatement(
+                    "DELETE FROM fincas WHERE id = ?")) {
+                psFinca.setInt(1, idFinca);
+                filasFinca = psFinca.executeUpdate();
+            }
+
+            if (filasFinca == 0) {
+                // No existía la finca -> deshacer y reportar false
+                conexion.rollback();
+                return false;
+            }
+
+            conexion.commit();
+            return true;
+
+        } catch (SQLException ex) {
+            try { conexion.rollback(); } catch (SQLException ignore) {}
+            ex.printStackTrace();
             return false;
+        } finally {
+            try { conexion.setAutoCommit(prevAutoCommit); } catch (SQLException ignore) {}
         }
     }
 

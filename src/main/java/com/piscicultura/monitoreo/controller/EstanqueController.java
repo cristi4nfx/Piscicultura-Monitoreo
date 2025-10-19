@@ -281,18 +281,6 @@ public class EstanqueController implements Initializable {
         TextField txtCapacidad = new TextField();
         txtCapacidad.setPromptText("m³");
 
-        TextField txtTemp = new TextField();
-        txtTemp.setPromptText("°C");
-
-        TextField txtPh = new TextField();
-        txtPh.setPromptText("0 - 14");
-
-        TextField txtOxigeno = new TextField();
-        txtOxigeno.setPromptText("mg/L");
-
-        TextField txtAmoniaco = new TextField();
-        txtAmoniaco.setPromptText("mg/L");
-
         // Especie (opcional)
         ComboBox<Especie> cboEspecie = new ComboBox<>();
         cboEspecie.setPromptText("Elige una especie…");
@@ -336,10 +324,6 @@ public class EstanqueController implements Initializable {
         grid.add(new Label("Tipo:"), 0, r);            grid.add(txtTipo, 1, r++);
         grid.add(new Label("Estado:"), 0, r);          grid.add(cboEstado, 1, r++);
         grid.add(new Label("Capacidad (m³):"), 0, r);  grid.add(txtCapacidad, 1, r++);
-        grid.add(new Label("T° agua (°C):"), 0, r);    grid.add(txtTemp, 1, r++);
-        grid.add(new Label("pH:"), 0, r);              grid.add(txtPh, 1, r++);
-        grid.add(new Label("Oxígeno (mg/L):"), 0, r);  grid.add(txtOxigeno, 1, r++);
-        grid.add(new Label("Amoniaco (mg/L):"), 0, r); grid.add(txtAmoniaco, 1, r++);
         grid.add(new Label("Especie:"), 0, r);         grid.add(cboEspecie, 1, r++);
         grid.add(new Label("Cantidad:"), 0, r);        grid.add(txtCantidad, 1, r++);
         grid.add(new Label("Fecha siembra:"), 0, r);   grid.add(dpFecha, 1, r++);
@@ -349,24 +333,17 @@ public class EstanqueController implements Initializable {
         Node btnOkNode = dialog.getDialogPane().lookupButton(btnGuardar);
         btnOkNode.setDisable(true);
 
-        Runnable validate = () -> {
-            boolean ok = !safe(txtTipo.getText()).isBlank()
-                      && cboEstado.getValue() != null
-                      && parseFloat(txtCapacidad.getText()) != null
-                      && parseFloat(txtTemp.getText()) != null
-                      && parseFloat(txtPh.getText()) != null
-                      && parseFloat(txtOxigeno.getText()) != null
-                      && parseFloat(txtAmoniaco.getText()) != null;
-            btnOkNode.setDisable(!ok);
-        };
+    Runnable validate = () -> {
+        boolean ok = (!safe(txtTipo.getText()).isBlank()
+                   && cboEstado.getValue() != null
+                   && (parseFloat(txtCapacidad.getText()) != null));
+        btnOkNode.setDisable(!ok);
+    };
+
 
         txtTipo.textProperty().addListener((o, a, b) -> validate.run());
         cboEstado.valueProperty().addListener((o, a, b) -> validate.run());
         txtCapacidad.textProperty().addListener((o, a, b) -> validate.run());
-        txtTemp.textProperty().addListener((o, a, b) -> validate.run());
-        txtPh.textProperty().addListener((o, a, b) -> validate.run());
-        txtOxigeno.textProperty().addListener((o, a, b) -> validate.run());
-        txtAmoniaco.textProperty().addListener((o, a, b) -> validate.run());
         validate.run();
 
         dialog.setResultConverter(bt -> {
@@ -377,10 +354,6 @@ public class EstanqueController implements Initializable {
                 e.setTipo(safe(txtTipo.getText()));
                 e.setEstado(safe(cboEstado.getValue()));
                 e.setCapacidad(parseFloat(txtCapacidad.getText()));
-                e.setTemperaturaAgua(parseFloat(txtTemp.getText()));
-                e.setPhAgua(parseFloat(txtPh.getText()));
-                e.setOxigeno(parseFloat(txtOxigeno.getText()));
-                e.setAmoniaco(parseFloat(txtAmoniaco.getText()));
 
                 res.estanque = e;
 

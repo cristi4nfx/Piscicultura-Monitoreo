@@ -9,12 +9,15 @@ package com.piscicultura.monitoreo.model;
  * @author Cristian
  */
 
+import com.piscicultura.monitoreo.dao.EspecieDAO;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class Especie {
-    private int idEspecie;
+    private Integer idEspecie;
     private String nombreCientifico;
     private String nombreComun;
     private int edadDias;
@@ -76,6 +79,23 @@ public class Especie {
     public int getCantidad() { return cantidad; }
     public void setCantidad(int cantidad) { this.cantidad = cantidad; }
 
-    public List<Parametro> getParametros() { return parametros; }
 
+    public List<Parametro> getParametros() throws Exception {
+        // Si ya están cargados, regresa
+        if (parametros != null && !parametros.isEmpty()) return parametros;
+
+        // Si no hay id, no hay qué consultar
+        if (idEspecie == null || idEspecie <= 0) return parametros;
+
+        // CARGA SIMPLE DESDE LA BD (usa tu helper de conexión)
+        try (Connection c = com.piscicultura.monitoreo.util.ConexionDB.getConnection()) {
+            EspecieDAO dao = new EspecieDAO(c);
+            parametros = dao.obtenerParametrosPorEspecie(idEspecie);
+        } catch (SQLException e) {
+            System.err.println("Error cargando parámetros de especie " + idEspecie + ": " + e.getMessage());
+            // deja 'parametros' como lista vacía para evitar NPE
+            parametros = new ArrayList<>();
+        }
+        return parametros;
+    }
 }

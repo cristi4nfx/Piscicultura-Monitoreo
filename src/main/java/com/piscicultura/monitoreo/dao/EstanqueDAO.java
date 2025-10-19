@@ -30,10 +30,15 @@ public class EstanqueDAO {
     // ============================
     public int insertar(Estanque e, int idFinca) throws SQLException {
         final String sql = """
-            INSERT INTO estanques (id_finca, tipo, estado, capacidad, temperatura_agua, ph_agua, oxigeno, amoniaco)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO estanques (
+                id_finca, tipo, estado, capacidad,
+                temperatura_agua, ph_agua, oxigeno, amoniaco, id_especie
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            RETURNING id_estanque
         """;
-        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, idFinca);
             ps.setString(2, e.getTipo());
             ps.setString(3, e.getEstado());
@@ -43,35 +48,27 @@ public class EstanqueDAO {
             ps.setFloat(7, e.getOxigeno());
             ps.setFloat(8, e.getAmoniaco());
 
-            int affected = ps.executeUpdate();
-            if (affected == 0) return 0;
+            // id_especie (puede ser null si no eligieron especie)
+            Integer idEsp = null;
+            if (e.getEspecies() != null && !e.getEspecies().isEmpty() && e.getEspecies().get(0) != null) {
+                idEsp = e.getEspecies().get(0).getIdEspecie();
+            }
+            if (idEsp != null) {
+                ps.setInt(9, idEsp);
+            } else {
+                ps.setNull(9, Types.INTEGER);
+            }
 
-            try (ResultSet keys = ps.getGeneratedKeys()) {
-                if (keys.next()) {
-                    int idGen = keys.getInt(1);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int idGen = rs.getInt(1);
                     e.setIdEstanque(idGen);
                     return idGen;
                 }
             }
         }
         return 0;
-    }
 
-    // ============================
-    // CREATE relación estanque-especie
-    // ============================
-    public boolean insertarRelacionEstanqueEspecie(int idEstanque, int idEspecie, Integer cantidad, Date fechaSiembra) throws SQLException {
-        final String sql = """
-            INSERT INTO estanque_especie (id_estanque, id_especie, cantidad, fecha_siembra)
-            VALUES (?,?,?,?)
-        """;
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, idEstanque);
-            ps.setInt(2, idEspecie);
-            if (cantidad == null) ps.setNull(3, Types.INTEGER); else ps.setInt(3, cantidad);
-            if (fechaSiembra == null) ps.setNull(4, Types.DATE); else ps.setDate(4, fechaSiembra);
-            return ps.executeUpdate() > 0;
-        }
     }
 
     // ============================

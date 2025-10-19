@@ -46,8 +46,6 @@ public class Estanque {
     }
 
     public boolean validarCondiciones(Especie especie) {
-        for (Parametro p : especie.getParametros()) {
-        }
         return true;
     }
 

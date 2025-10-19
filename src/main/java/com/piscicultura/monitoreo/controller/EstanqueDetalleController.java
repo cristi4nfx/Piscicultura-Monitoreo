@@ -28,7 +28,7 @@ public class EstanqueDetalleController {
     private Connection conn;
     private EspecieDAO especieDAO;
 
-    public void init(Estanque estanque, Connection conn) {
+    public void init(Estanque estanque, Connection conn) throws Exception {
         this.estanque = estanque;
         this.conn = conn;
         this.especieDAO = new EspecieDAO(conn);
@@ -39,11 +39,11 @@ public class EstanqueDetalleController {
     }
 
     @FXML
-    private void onRefrescar() {
+    private void onRefrescar() throws Exception {
         refrescar();
     }
 
-    private void refrescar() {
+    private void refrescar() throws Exception {
         // 1) Valores actuales
         double t = estanque.getTemperaturaAgua();
         double ph = estanque.getPhAgua();
@@ -72,7 +72,7 @@ public class EstanqueDetalleController {
 
     // ==================== INFO DE LA ESPECIE ====================
 
-    private void cargarInfoEspecie() {
+    private void cargarInfoEspecie() throws Exception {
         panelEspecieInfo.getChildren().clear();
         
         // Verificar si hay especie asignada
@@ -141,7 +141,7 @@ public class EstanqueDetalleController {
 
     // ==================== SEMÁFOROS DINÁMICOS (1 ESPECIE) ====================
 
-    private void setSemaforosDinamicos() {
+    private void setSemaforosDinamicos() throws Exception {
         Especie especie = obtenerEspecieEstanque();
         
         // Obtener parámetros de la especie (si existe)
@@ -165,7 +165,7 @@ public class EstanqueDetalleController {
         actualizarTooltipGlobal(paramTemp, paramPh, paramOx, paramNh3, especie);
     }
 
-    private Parametro obtenerParametroEspecie(String nombreParametro, Especie especie) {
+    private Parametro obtenerParametroEspecie(String nombreParametro, Especie especie) throws Exception {
         if (especie == null || especie.getParametros() == null) {
             return crearParametroPorDefecto(nombreParametro);
         }

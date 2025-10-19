@@ -233,28 +233,20 @@ public class EstanqueController implements Initializable {
             if (conn != null) {
                 com.piscicultura.monitoreo.dao.EstanqueDAO dao =
                         new com.piscicultura.monitoreo.dao.EstanqueDAO(conn);
-
-                int idGen = dao.insertar(nuevo, finca.getIdGranja());
-                if (idGen <= 0) {
-                    setEstado("No se pudo insertar el estanque en la BD.", true);
-                    return;
-                }
-                nuevo.setIdEstanque(idGen);
-
-                // Inserta la relación estanque-especie si el usuario eligió una
+                
                 if (especieElegida != null) {
-                    dao.insertarRelacionEstanqueEspecie(
-                            idGen,
-                            especieElegida.getIdEspecie(),
-                            cantElegida,
-                            fechaElegida
-                    );
                     // Refleja en el modelo en memoria para que la tarjeta la muestre sin recargar
                     if (nuevo.getEspecies() == null) {
                         nuevo.setEspecies(new ArrayList<>());
                     }
                     nuevo.agregarEspecie(especieElegida);
                 }
+                int idGen = dao.insertar(nuevo, finca.getIdGranja());
+                if (idGen <= 0) {
+                    setEstado("No se pudo insertar el estanque en la BD.", true);
+                    return;
+                }
+                nuevo.setIdEstanque(idGen);
             } else {
                 // Sin BD: id temporal y agregamos la especie localmente
                 int tempId = - (finca.getEstanques().size() + 1);

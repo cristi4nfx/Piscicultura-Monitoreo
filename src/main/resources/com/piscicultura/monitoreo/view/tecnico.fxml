@@ -12,11 +12,12 @@
     <top>
     <VBox spacing="6">
             <MenuBar>
+
                 <Menu text="Sistema">
                     <MenuItem text="Cerrar sesión" onAction="#onCerrarSesion"/>
                 </Menu>
                 <Menu text="Fincas">
-                    <MenuItem text="Listar estanque" onAction="#onCerrarSesion"/>
+                    <MenuItem text="Ver fincas" onAction="#onVerFincas"/>
                 </Menu>
                 
             </MenuBar>
@@ -26,7 +27,7 @@
                 <padding>
                     <Insets top="10" right="10" bottom="10" left="10"/>
                 </padding>
-                <Label text="Panel de Técnico" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+                <Label text="Panel de Tecnico" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
                 <Pane HBox.hgrow="ALWAYS"/>
                 <Label text="Bienvenido:"/>
                 <Label fx:id="lblNombre" style="-fx-font-weight: bold;"/>
@@ -43,8 +44,8 @@
                 <Insets top="12" right="12" bottom="12" left="12"/>
             </padding>
             <Label text="Acciones rápidas" style="-fx-font-weight: bold;"/>
-            <Button text="Inicio" onAction="#onCerrarSesion" maxWidth="Infinity"/>
-            <Button text="Crear alerta" onAction="#onCerrarSesion" maxWidth="Infinity"/>
+            <Button text="Inicio" onAction="#onInicio" maxWidth="Infinity"/>
+            <Button text="Ver fincas" onAction="#onVerFincas" maxWidth="Infinity"/>
         </VBox>
     </left>
 

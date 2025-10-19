@@ -260,7 +260,63 @@ public class EstanqueDetalleController {
     }
 
     private void cargarHistoricoYGraficar(int idEstanque) {
-        // ... (mantener tu código existente del histórico)
+        final String sql = """
+            SELECT fecha_medicion, temperatura_agua, ph_agua, oxigeno, amoniaco
+            FROM mediciones
+            WHERE id_estanque = ?
+            ORDER BY fecha_medicion ASC
+            LIMIT 200
+        """;
+
+        // Series para cada variable
+        XYChart.Series<String, Number> sT = new XYChart.Series<>(); sT.setName("Temp (°C)");
+        XYChart.Series<String, Number> sP = new XYChart.Series<>(); sP.setName("pH");
+        XYChart.Series<String, Number> sO = new XYChart.Series<>(); sO.setName("O₂ (mg/L)");
+        XYChart.Series<String, Number> sN = new XYChart.Series<>(); sN.setName("NH₃ (mg/L)");
+
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MM-dd HH:mm");
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idEstanque);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Timestamp fecha = rs.getTimestamp("fecha_medicion");
+                    String label = fecha.toLocalDateTime().format(fmt);
+
+                    double temp = rs.getDouble("temperatura_agua");
+                    double ph   = rs.getDouble("ph_agua");
+                    double ox   = rs.getDouble("oxigeno");
+                    double nh3  = rs.getDouble("amoniaco");
+
+                    sT.getData().add(new XYChart.Data<>(label, temp));
+                    sP.getData().add(new XYChart.Data<>(label, ph));
+                    sO.getData().add(new XYChart.Data<>(label, ox));
+                    sN.getData().add(new XYChart.Data<>(label, nh3));
+                }
+            }
+        } catch (SQLException ex) {
+            System.out.println("[Histórico] Error consultando mediciones: " + ex.getMessage());
+            return;
+        }
+
+        // Si no hay datos, salimos
+        if (sT.getData().isEmpty()) {
+            System.out.println("[Histórico] No hay datos de mediciones para el estanque " + idEstanque);
+            return;
+        }
+
+        // Limpiamos y añadimos las series
+        lineHistorico.getData().clear();
+        lineHistorico.getData().addAll(sT, sP, sO, sN);
+
+        // Tooltips bonitos
+        for (XYChart.Series<String, Number> serie : lineHistorico.getData()) {
+            for (XYChart.Data<String, Number> punto : serie.getData()) {
+                Tooltip tip = new Tooltip(serie.getName() + "\n" +
+                        punto.getXValue() + " → " + punto.getYValue());
+                Tooltip.install(punto.getNode(), tip);
+            }
+        }
     }
 
     private Parametro crearParametroPorDefecto(String nombre) {

@@ -512,8 +512,8 @@ private void abrirDetalleEstanque(Estanque est) {
         if (s.endsWith(".0")) s = s.substring(0, s.length()-2);
         return s;
     }
-        /** Elimina un estanque (confirmando con el usuario), borra en BD si aplica, 
-     *  lo quita de las listas en memoria y refresca el listado. */
+    /** Elimina un estanque (confirmando con el usuario), borra en BD si aplica, 
+    *  lo quita de las listas en memoria y refresca el listado. */
     private void eliminarEstanque(Estanque est, Node cardNode) {
         if (est == null) {
             setEstado("Estanque nulo.", true);

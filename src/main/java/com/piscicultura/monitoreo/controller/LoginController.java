@@ -89,14 +89,33 @@ public class LoginController {
 
                         case "TECNICO":
                             // 🔹 Más adelante cargarás la vista del técnico
-                            System.out.println("🔧 Vista del técnico (pendiente)");
-                            lblMensaje.setText("🔧 Módulo de técnico en desarrollo.");
+                            javafx.fxml.FXMLLoader tecnicoLoader = new javafx.fxml.FXMLLoader(
+                                    getClass().getResource("/com/piscicultura/monitoreo/view/tecnico.fxml")
+                            );
+                            javafx.scene.Parent tecnico = tecnicoLoader.load();
+
+                            com.piscicultura.monitoreo.controller.TecnicoController tecnicoController = tecnicoLoader.getController();
+                            tecnicoController.init(usuario, stage);
+
+                            javafx.scene.Scene tecnicoScene = new javafx.scene.Scene(tecnico);
+                            stage.setScene(tecnicoScene);
+                            stage.centerOnScreen();
                             break;
 
                         case "INVESTIGADOR":
                             // 🔹 Más adelante cargarás la vista del investigador
-                            System.out.println("🔬 Vista del investigador (pendiente)");
-                            lblMensaje.setText("🔬 Módulo de investigador en desarrollo.");
+                            
+                            javafx.fxml.FXMLLoader investigadorLoader = new javafx.fxml.FXMLLoader(
+                                    getClass().getResource("/com/piscicultura/monitoreo/view/investigador.fxml")
+                            );
+                            javafx.scene.Parent investigador = investigadorLoader.load();
+
+                            com.piscicultura.monitoreo.controller.InvestigadorController investigadorController = investigadorLoader.getController();
+                            investigadorController.init(usuario, stage);
+
+                            javafx.scene.Scene investigadorScene = new javafx.scene.Scene(investigador);
+                            stage.setScene(investigadorScene);
+                            stage.centerOnScreen();
                             break;
 
                         default:

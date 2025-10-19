@@ -78,7 +78,11 @@ public class Especie {
 
     public int getCantidad() { return cantidad; }
     public void setCantidad(int cantidad) { this.cantidad = cantidad; }
-
+    
+    public void setParametros(List<Parametro> nuevos) {
+        // Reemplaza por una nueva lista deduplicada
+        this.parametros = (nuevos != null) ? new ArrayList<>(nuevos) : new ArrayList<>();
+    }
 
     public List<Parametro> getParametros() throws Exception {
         // Si ya están cargados, regresa

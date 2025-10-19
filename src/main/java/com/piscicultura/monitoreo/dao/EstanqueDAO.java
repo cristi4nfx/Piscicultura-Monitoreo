@@ -13,6 +13,7 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
 
@@ -74,6 +75,7 @@ public class EstanqueDAO {
     // ============================
     // READ: listar por finca (con especies)
     // ============================
+    
     public List<Estanque> listarPorFincaConEspecies(int idFinca) throws SQLException {
         String sql = """
             SELECT e.id_estanque, e.id_finca, e.tipo, e.estado, e.capacidad,
@@ -85,7 +87,7 @@ public class EstanqueDAO {
             WHERE e.id_finca = ?
             ORDER BY e.id_estanque
         """;
-
+        
         List<Estanque> out = new ArrayList<>();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, idFinca);
@@ -117,7 +119,7 @@ public class EstanqueDAO {
                         try {
                             EspecieDAO especieDAO = new EspecieDAO(conn);
                             List<Parametro> parametros = especieDAO.obtenerParametrosPorEspecie(idEsp);
-                            esp.getParametros().addAll(parametros);
+                            esp.setParametros(dedupParametros(parametros));
 
                             System.out.println("✅ Cargados " + parametros.size() + " parámetros para " + esp.getNombreComun());
                         } catch (Exception e) {
@@ -134,6 +136,16 @@ public class EstanqueDAO {
             }
         }
         return out;
+    }
+    
+    private static List<Parametro> dedupParametros(List<Parametro> in) {
+        if (in == null) return new ArrayList<>();
+        Map<String, Parametro> map = new LinkedHashMap<>();
+        for (Parametro p : in) {
+            String key = (p.getNombre() + "|" + p.getUnidad()).toLowerCase(Locale.ROOT);
+            map.putIfAbsent(key, p); // conserva el primero, descarta repetidos lógicos
+        }
+        return new ArrayList<>(map.values());
     }
 
     // ============================

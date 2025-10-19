@@ -17,7 +17,7 @@ import java.io.IOException;
 import javafx.scene.Parent;
 import javafx.scene.layout.VBox;
 
-public class TecnicoController {
+public class InvestigadorController {
 
     @FXML private Label lblNombre;
     @FXML private Label lblRol;
@@ -104,7 +104,7 @@ public class TecnicoController {
             Node content = lblNombre.getScene().lookup("#contentPane");
             if (content instanceof StackPane sp) {
                 // Panel de inicio (más elegante y útil)
-                Label title = new Label("Panel de Tecnico");
+                Label title = new Label("Panel de Investigador");
                 title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
                 Label subtitle = new Label("Aquí podrás ver las gráficas y el estado general de los estanques.");
                 subtitle.setStyle("-fx-text-fill:#555; -fx-font-size:14px;");
@@ -145,3 +145,4 @@ public class TecnicoController {
         a.showAndWait();
     }
 }
+

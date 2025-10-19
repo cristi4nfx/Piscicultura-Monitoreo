@@ -5,7 +5,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/8.0.171"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.piscicultura.monitoreo.controller.TecnicoController"
+            fx:controller="com.piscicultura.monitoreo.controller.InvestigadorController"
             prefWidth="1000" prefHeight="650">
 
     <!-- TOP: Menú -->
@@ -27,7 +27,7 @@
                 <padding>
                     <Insets top="10" right="10" bottom="10" left="10"/>
                 </padding>
-                <Label text="Panel de Tecnico" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+                <Label text="Panel de Investigador" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
                 <Pane HBox.hgrow="ALWAYS"/>
                 <Label text="Bienvenido:"/>
                 <Label fx:id="lblNombre" style="-fx-font-weight: bold;"/>

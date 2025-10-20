@@ -12,6 +12,7 @@ import javafx.scene.layout.*;
 import java.sql.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import javafx.event.ActionEvent;
 
 public class EstanqueDetalleController {
 
@@ -32,49 +33,54 @@ public class EstanqueDetalleController {
         this.estanque = estanque;
         this.conn = conn;
         this.especieDAO = new EspecieDAO(conn);
-        
+
         lblTitulo.setText("Estanque #" + estanque.getIdEstanque() + " — " + safe(estanque.getTipo()));
         cargarInfoEspecie();
         refrescar();
     }
 
     @FXML
-    private void onRefrescar() throws Exception {
-        refrescar();
+    private void onRefrescar(ActionEvent e) {   // <-- ahora con @FXML
+        try {
+            cargarInfoEspecie();
+            refrescar();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
+    // ==================== REFRESCAR VISTA ====================
+
     private void refrescar() throws Exception {
-        // 1) Valores actuales
-        double t = estanque.getTemperaturaAgua();
-        double ph = estanque.getPhAgua();
-        double ox = estanque.getOxigeno();
-        double nh3 = estanque.getAmoniaco();
-        double cap = estanque.getCapacidad();
+        if (estanque == null) return;
 
-        lblTemp.setText(fmt(t));
-        lblPh.setText(fmt(ph));
-        lblOx.setText(fmt(ox));
-        lblNh3.setText(fmt(nh3));
-        lblCap.setText(fmt(cap));
+        // a) Refrescar labels numéricos
+        lblTemp.setText(fmt(estanque.getTemperaturaAgua()));
+        lblPh.setText(fmt(estanque.getPhAgua()));
+        lblOx.setText(fmt(estanque.getOxigeno()));
+        lblNh3.setText(fmt(estanque.getAmoniaco()));
+        lblCap.setText(fmt(estanque.getCapacidad()));
 
-        // 2) SEMÁFOROS DINÁMICOS (1 especie)
+        // b) Semáforos dinámicos con rangos de la especie (o por defecto)
         setSemaforosDinamicos();
 
-        // 3) Gráficos
-        actualizarGraficoBarras(t, ph, ox, nh3);
+        // c) Barras con lecturas actuales
+        actualizarGraficoBarras(
+            estanque.getTemperaturaAgua(),
+            estanque.getPhAgua(),
+            estanque.getOxigeno(),
+            estanque.getAmoniaco()
+        );
 
-        // 4) Histórico
-        lineHistorico.getData().clear();
-        if (conn != null) {
-            cargarHistoricoYGraficar(estanque.getIdEstanque());
-        }
+        // d) Histórico (consulta BD y dibuja)
+        cargarHistoricoYGraficar(estanque.getIdEstanque());
     }
 
     // ==================== INFO DE LA ESPECIE ====================
 
     private void cargarInfoEspecie() throws Exception {
         panelEspecieInfo.getChildren().clear();
-        
+
         // Verificar si hay especie asignada
         Especie especie = obtenerEspecieEstanque();
         if (especie == null) {
@@ -91,16 +97,16 @@ public class EstanqueDetalleController {
         HBox header = new HBox(10);
         Label nombre = new Label(especie.getNombreComun());
         nombre.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
-        
+
         Label cientifico = new Label("(" + especie.getNombreCientifico() + ")");
         cientifico.setStyle("-fx-text-fill: #7f8c8d; -fx-font-size: 12px;");
-        
+
         Label cantidad = new Label("• " + especie.getCantidad() + " peces");
         cantidad.setStyle("-fx-text-fill: #3498db; -fx-font-size: 12px;");
-        
+
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        
+
         header.getChildren().addAll(nombre, cientifico, spacer, cantidad);
 
         // Parámetros
@@ -113,11 +119,11 @@ public class EstanqueDetalleController {
             for (Parametro param : especie.getParametros()) {
                 Label paramLabel = new Label("• " + param.getNombre() + ":");
                 paramLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 11px;");
-                
-                Label rangoLabel = new Label(String.format("%.1f - %.1f %s", 
+
+                Label rangoLabel = new Label(String.format("%.1f - %.1f %s",
                     param.getRangoMin(), param.getRangoMax(), param.getUnidad()));
                 rangoLabel.setStyle("-fx-text-fill: #27ae60; -fx-font-size: 11px;");
-                
+
                 gridParametros.add(paramLabel, 0, row);
                 gridParametros.add(rangoLabel, 1, row);
                 row++;
@@ -143,23 +149,23 @@ public class EstanqueDetalleController {
 
     private void setSemaforosDinamicos() throws Exception {
         Especie especie = obtenerEspecieEstanque();
-        
+
         // Obtener parámetros de la especie (si existe)
         Parametro paramTemp = obtenerParametroEspecie("Temperatura", especie);
-        Parametro paramPh = obtenerParametroEspecie("pH", especie);
-        Parametro paramOx = obtenerParametroEspecie("Oxígeno", especie);
-        Parametro paramNh3 = obtenerParametroEspecie("Amoniaco", especie);
+        Parametro paramPh   = obtenerParametroEspecie("pH", especie);
+        Parametro paramOx   = obtenerParametroEspecie("Oxígeno", especie);
+        Parametro paramNh3  = obtenerParametroEspecie("Amoniaco", especie);
 
-        double t = estanque.getTemperaturaAgua();
+        double t  = estanque.getTemperaturaAgua();
         double ph = estanque.getPhAgua();
         double ox = estanque.getOxigeno();
-        double nh3 = estanque.getAmoniaco();
+        double nh3= estanque.getAmoniaco();
 
         // Configurar semáforos
-        configurarSemaforo("Temperatura", t, paramTemp, semTemp, icoTemp, dotTemp);
-        configurarSemaforo("pH", ph, paramPh, semPh, icoPh, dotPh);
-        configurarSemaforo("Oxígeno", ox, paramOx, semOx, icoOx, dotOx);
-        configurarSemaforo("Amoniaco", nh3, paramNh3, semNh3, icoNh3, dotNh3);
+        configurarSemaforo("Temperatura", t,  paramTemp, semTemp, icoTemp, dotTemp);
+        configurarSemaforo("pH",          ph, paramPh,   semPh,   icoPh,  dotPh);
+        configurarSemaforo("Oxígeno",     ox, paramOx,   semOx,   icoOx,  dotOx);
+        configurarSemaforo("Amoniaco",    nh3,paramNh3,  semNh3,  icoNh3, dotNh3);
 
         // Tooltip informativo
         actualizarTooltipGlobal(paramTemp, paramPh, paramOx, paramNh3, especie);
@@ -179,8 +185,8 @@ public class EstanqueDetalleController {
         return crearParametroPorDefecto(nombreParametro);
     }
 
-    private void configurarSemaforo(String nombre, double valor, Parametro parametro, 
-                                   Label label, Label icono, Region punto) {
+    private void configurarSemaforo(String nombre, double valor, Parametro parametro,
+                                    Label label, Label icono, Region punto) {
         String estado = calcularEstado(valor, parametro);
         String texto, color, simbolo;
 
@@ -207,15 +213,15 @@ public class EstanqueDetalleController {
         punto.setStyle("-fx-background-color: " + color + ";");
 
         // Tooltip detallado
-        String tooltip = String.format("%s: %.2f\nRango ideal: %.1f - %.1f %s\nEstado: %s", 
-            nombre, valor, parametro.getRangoMin(), parametro.getRangoMax(), 
+        String tooltip = String.format("%s: %.2f\nRango ideal: %.1f - %.1f %s\nEstado: %s",
+            nombre, valor, parametro.getRangoMin(), parametro.getRangoMax(),
             parametro.getUnidad(), texto);
         Tooltip.install(label, new Tooltip(tooltip));
     }
 
     private String calcularEstado(double valor, Parametro parametro) {
         if (Double.isNaN(valor)) return "red";
-        
+
         float min = parametro.getRangoMin();
         float max = parametro.getRangoMax();
         float tolerancia = (max - min) * 0.15f;
@@ -227,11 +233,11 @@ public class EstanqueDetalleController {
 
     private void actualizarTooltipGlobal(Parametro temp, Parametro ph, Parametro ox, Parametro nh3, Especie especie) {
         String especieNombre = (especie != null) ? especie.getNombreComun() : "No asignada";
-        
+
         String tooltipText = String.format(
             "Especie: %s\nParámetros utilizados:\n\n" +
             "🌡️ Temperatura: %.1f-%.1f %s\n" +
-            "💧 pH: %.1f-%.1f %s\n" + 
+            "💧 pH: %.1f-%.1f %s\n" +
             "🌀 Oxígeno: ≥%.1f %s\n" +
             "☣️ Amoniaco: ≤%.3f %s",
             especieNombre,
@@ -240,7 +246,7 @@ public class EstanqueDetalleController {
             ox.getRangoMin(), ox.getUnidad(),
             nh3.getRangoMax(), nh3.getUnidad()
         );
-        
+
         Tooltip.install(lblTitulo, new Tooltip(tooltipText));
     }
 
@@ -250,12 +256,12 @@ public class EstanqueDetalleController {
         barActuales.getData().clear();
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Valores Actuales");
-        
+
         series.getData().add(new XYChart.Data<>("Temp (°C)", t));
         series.getData().add(new XYChart.Data<>("pH", ph));
         series.getData().add(new XYChart.Data<>("O₂ (mg/L)", ox));
         series.getData().add(new XYChart.Data<>("NH₃ (mg/L)", nh3));
-        
+
         barActuales.getData().add(series);
     }
 
@@ -309,12 +315,14 @@ public class EstanqueDetalleController {
         lineHistorico.getData().clear();
         lineHistorico.getData().addAll(sT, sP, sO, sN);
 
-        // Tooltips bonitos
+        // Tooltips bonitos (si los nodos ya están)
         for (XYChart.Series<String, Number> serie : lineHistorico.getData()) {
             for (XYChart.Data<String, Number> punto : serie.getData()) {
-                Tooltip tip = new Tooltip(serie.getName() + "\n" +
-                        punto.getXValue() + " → " + punto.getYValue());
-                Tooltip.install(punto.getNode(), tip);
+                if (punto.getNode() != null) {
+                    Tooltip tip = new Tooltip(serie.getName() + "\n" +
+                            punto.getXValue() + " → " + punto.getYValue());
+                    Tooltip.install(punto.getNode(), tip);
+                }
             }
         }
     }
@@ -332,7 +340,7 @@ public class EstanqueDetalleController {
     private static String safe(String s) {
         return (s == null || s.isBlank()) ? "" : s.trim();
     }
-    
+
     private static String fmt(double v) {
         if (Double.isNaN(v)) return "-";
         String s = String.format("%.2f", v);

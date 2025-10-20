@@ -216,7 +216,7 @@ public class FincaController implements Initializable {
             // (esto captura EXACTAMENTE lo que había antes de abrir estanques)
             List<Node> prevChildrenSnapshot = new ArrayList<>(desktopPane.getChildren());
 
-            com.piscicultura.monitoreo.controller.EstanqueController ctrl = loader.getController();
+            com.piscicultura.monitoreo.controller.EstanqueController_noRoot ctrl = loader.getController();
 
             // Acción de volver: restaurar el snapshot tal cual estaba
             Runnable onBack = () -> {

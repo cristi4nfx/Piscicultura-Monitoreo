@@ -117,26 +117,12 @@ public class EstanqueController_noRoot implements Initializable {
        btnAbrir.setPadding(new Insets(4, 10, 4, 10));
        btnAbrir.setOnAction(e -> abrirDetalleEstanque(est));
 
-       // --- Botón Eliminar ---
-       Button btnEliminar = new Button("Eliminar");
-       btnEliminar.setStyle("""
-           -fx-background-color:#e53935;
-           -fx-text-fill:white;
-           -fx-font-weight:bold;
-           -fx-background-radius:6;
-           -fx-cursor: hand;
-       """);
-       btnEliminar.setPadding(new Insets(4, 10, 4, 10));
-       btnEliminar.setOnAction(e -> {
-           e.consume(); // evita que abra el detalle
-           eliminarEstanque(est, card);
-       });
 
        // --- Encabezado con separación estética ---
        Region spacer = new Region();
        HBox.setHgrow(spacer, Priority.ALWAYS);
 
-       HBox header = new HBox(10, t, spacer, btnAbrir, btnEliminar); // 10 px de espacio
+       HBox header = new HBox(10, t, spacer, btnAbrir); // 10 px de espacio
        header.setAlignment(Pos.CENTER_LEFT);
        header.setPadding(new Insets(10, 12, 8, 12));
 
@@ -512,59 +498,5 @@ private void abrirDetalleEstanque(Estanque est) {
         if (s.endsWith(".0")) s = s.substring(0, s.length()-2);
         return s;
     }
-    /** Elimina un estanque (confirmando con el usuario), borra en BD si aplica, 
-    *  lo quita de las listas en memoria y refresca el listado. */
-    private void eliminarEstanque(Estanque est, Node cardNode) {
-        if (est == null) {
-            setEstado("Estanque nulo.", true);
-            return;
-        }
-
-        // 1) Confirmación
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Eliminar estanque");
-        confirm.setHeaderText("¿Eliminar el estanque #" + est.getIdEstanque() + "?");
-        confirm.setContentText("Esta acción no se puede deshacer.");
-        Optional<ButtonType> r = confirm.showAndWait();
-        if (r.isEmpty() || r.get() != ButtonType.OK) {
-            setEstado("Eliminación cancelada.", false);
-            return;
-        }
-
-        try {
-            // 2) Si hay BD y el id es real (>0), borramos en BD
-            if (conn != null && !conn.isClosed() && est.getIdEstanque() > 0) {
-                com.piscicultura.monitoreo.dao.EstanqueDAO dao =
-                        new com.piscicultura.monitoreo.dao.EstanqueDAO(conn);
-
-                // Sugerido: si tu DAO tiene un método "eliminarCompleto" que borre hijas (especie, mediciones, alarmas)
-                // boolean ok = dao.eliminarCompleto(est.getIdEstanque());
-                // Si no, usa eliminar() simple:
-                boolean ok = dao.eliminar(est.getIdEstanque());
-
-                if (!ok) {
-                    setEstado("No se pudo eliminar el estanque en BD (id " + est.getIdEstanque() + ").", true);
-                    return;
-                }
-            }
-
-            // 3) Quitar de listas en memoria (finca y caché)
-            if (finca != null && finca.getEstanques() != null) {
-                finca.getEstanques().removeIf(e -> Objects.equals(e.getIdEstanque(), est.getIdEstanque()));
-            }
-            if (estanquesCache != null) {
-                estanquesCache.removeIf(e -> Objects.equals(e.getIdEstanque(), est.getIdEstanque()));
-            }
-
-            // 4) Refrescar UI
-            poblarListado(estanquesCache);
-            setEstado("Estanque #" + est.getIdEstanque() + " eliminado.", false);
-
-        } catch (Exception ex) {
-            setEstado("Error eliminando estanque: " + ex.getMessage(), true);
-            ex.printStackTrace();
-        }
-    }
-
 }
 
